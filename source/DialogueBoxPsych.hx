@@ -1,15 +1,11 @@
 package;
 
+import flixel.util.FlxDestroyUtil;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxColor;
 import haxe.Json;
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
-import openfl.utils.Assets;
 
 using StringTools;
 
@@ -38,12 +34,12 @@ typedef DialogueFile = {
 }
 
 typedef DialogueLine = {
-	var portrait:Null<String>;
-	var expression:Null<String>;
-	var text:Null<String>;
-	var boxState:Null<String>;
-	var speed:Null<Float>;
-	var sound:Null<String>;
+	var portrait:String;
+	var expression:String;
+	var text:String;
+	var boxState:String;
+	var ?speed:Float;
+	var sound:String;
 }
 
 class DialogueCharacter extends FlxSprite
@@ -70,8 +66,8 @@ class DialogueCharacter extends FlxSprite
 
 		reloadCharacterJson(character);
 		var imagePath = 'dialogue/${jsonFile.image}';
-		if (Paths.fileExists('images/$imagePath/Animation.json', TEXT)) {
-			frames = animateatlas.AtlasFrameMaker.construct(imagePath);
+		if (Paths.existsPath('images/$imagePath/Animation.json', TEXT)) {
+			frames = AtlasFrameMaker.construct(imagePath);
 		} else {
 			frames = Paths.getSparrowAtlas(imagePath);
 		}
@@ -84,21 +80,11 @@ class DialogueCharacter extends FlxSprite
 		var characterPath:String = 'images/dialogue/$character.json';
 		var rawJson = null;
 
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(characterPath);
-		if (!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath(characterPath);
-		}
-
-		if (!FileSystem.exists(path)) {
+		var path:String = Paths.getPath(characterPath);
+		if (!Paths.exists(path, TEXT)) {
 			path = Paths.getPreloadPath('images/dialogue/$DEFAULT_CHARACTER.json');
 		}
-		rawJson = File.getContent(path);
-
-		#else
-		var path:String = Paths.getPreloadPath(characterPath);
-		rawJson = Assets.getText(path);
-		#end
+		rawJson = Paths.getContent(path);
 		
 		jsonFile = cast Json.parse(rawJson);
 		if (jsonFile.no_antialiasing == null) jsonFile.no_antialiasing = false;
@@ -152,12 +138,18 @@ class DialogueCharacter extends FlxSprite
 		if (animation.curAnim == null) return false;
 		return !animation.curAnim.name.endsWith(IDLE_SUFFIX);
 	}
+
+	override public function destroy() {
+		jsonFile = null;
+		dialogueAnimations = null;
+		curCharacter = null;
+		super.destroy();
+	}
 }
 
 // TO DO: Clean code? Maybe? idk
 class DialogueBoxPsych extends FlxSpriteGroup
 {
-	var dialogue:Alphabet;
 	var dialogueList:DialogueFile = null;
 
 	public var finishThing:Void->Void;
@@ -172,7 +164,7 @@ class DialogueBoxPsych extends FlxSpriteGroup
 	var currentText:Int = 0;
 	var offsetPos:Float = -600;
 
-	var textBoxTypes:Array<String> = ['normal', 'angry'];
+	static var textBoxTypes:Array<String> = ['normal', 'angry'];
 
 	var curCharacter:String = "";
 
@@ -505,13 +497,11 @@ class DialogueBoxPsych extends FlxSpriteGroup
 	}
 
 	public static function parseDialogue(path:String):DialogueFile {
-		#if MODS_ALLOWED
-		if (FileSystem.exists(path))
+		if (Paths.exists(path, TEXT))
 		{
-			return cast Json.parse(File.getContent(path));
+			return cast Json.parse(Paths.getContent(path));
 		}
-		#end
-		return cast Json.parse(Assets.getText(path));
+		return null;
 	}
 
 	public static function updateBoxOffsets(box:FlxSprite) { //Had to make it static because of the editors
@@ -526,5 +516,20 @@ class DialogueBoxPsych extends FlxSpriteGroup
 		}
 		
 		if (!box.flipX) box.offset.y += 10;
+	}
+
+	override public function destroy() {
+		dialogueList = null;
+		finishThing = null;
+		nextDialogueThing = null;
+		skipDialogueThing = null;
+		bgFade = FlxDestroyUtil.destroy(bgFade);
+		box = FlxDestroyUtil.destroy(box);
+		textToType = null;
+		arrayCharacters = null;
+		curCharacter = null;
+		daText = FlxDestroyUtil.destroy(daText);
+		lastBoxType = null;
+		super.destroy();
 	}
 }

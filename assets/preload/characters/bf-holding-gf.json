@@ -1,0 +1,182 @@
+{
+	"animations": [
+		{
+			"enemyOffsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "BF idle dance",
+			"playerOffsets": [
+				-5,
+				0
+			]
+		},
+		{
+			"enemyOffsets": [
+				-48,
+				2
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "BF NOTE LEFT0",
+			"playerOffsets": [
+				4,
+				4
+			]
+		},
+		{
+			"enemyOffsets": [
+				-20,
+				-10
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "BF NOTE DOWN0",
+			"playerOffsets": [
+				-12,
+				-15
+			]
+		},
+		{
+			"enemyOffsets": [
+				20,
+				10
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "BF NOTE UP0",
+			"playerOffsets": [
+				-49,
+				10
+			]
+		},
+		{
+			"enemyOffsets": [
+				-3,
+				22
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "BF NOTE RIGHT0",
+			"playerOffsets": [
+				-50,
+				21
+			]
+		},
+		{
+			"enemyOffsets": [
+				-40,
+				4
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFTmiss",
+			"loop": false,
+			"name": "BF NOTE LEFT MISS",
+			"playerOffsets": [
+				4,
+				4
+			]
+		},
+		{
+			"enemyOffsets": [
+				-20,
+				-10
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"loop": false,
+			"name": "BF NOTE DOWN MISS",
+			"playerOffsets": [
+				-12,
+				-15
+			]
+		},
+		{
+			"enemyOffsets": [
+				39,
+				8
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUPmiss",
+			"loop": false,
+			"name": "BF NOTE UP MISS",
+			"playerOffsets": [
+				-49,
+				10
+			]
+		},
+		{
+			"enemyOffsets": [
+				6,
+				33
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"loop": false,
+			"name": "BF NOTE RIGHT MISS",
+			"playerOffsets": [
+				-43,
+				35
+			]
+		},
+		{
+			"enemyOffsets": [
+				68,
+				90
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "bfCatch",
+			"loop": false,
+			"name": "BF catches GF",
+			"playerOffsets": [
+				0,
+				90
+			]
+		}
+	],
+	"enemy_position": [
+		-150,
+		330
+	],
+	"repeatHoldAnimation": true,
+	"no_antialiasing": false,
+	"image": "characters/bfAndGF",
+	"enemy_cameraPosition": [
+		0,
+		30
+	],
+	"player_cameraPosition": [
+		0,
+		30
+	],
+	"healthicon": "bf",
+	"flip_x": true,
+	"healthbar_colors": [
+		49,
+		176,
+		209
+	],
+	"player_position": [
+		-7,
+		330
+	],
+	"sing_duration": 4,
+	"scale": 1
+}

@@ -1,5 +1,8 @@
 package animateatlas;
 
+#if sys
+import sys.FileSystem;
+#end
 import animateatlas.JSONData.AnimationData;
 import animateatlas.JSONData.AtlasData;
 import animateatlas.displayobject.SpriteAnimationLibrary;
@@ -9,14 +12,13 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.util.FlxColor;
 import haxe.Json;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
-#if MODS_ALLOWED
-import sys.FileSystem;
-#end
 
 using StringTools;
+
 class AtlasFrameMaker extends FlxFramesCollection
 {
 	static var framesLoaded:Map<String, FlxFramesCollection> = new Map(); //cache frame collections cause they take a million years to create
@@ -35,19 +37,14 @@ class AtlasFrameMaker extends FlxFramesCollection
 		var frameCollection:FlxFramesCollection;
 		var frameArray:Array<Array<FlxFrame>> = [];
 
-		if (Paths.fileExists('images/$key/spritemap1.json', TEXT))
+		if (Paths.existsPath('images/$key/spritemap1.json', TEXT))
 		{
-			PlayState.instance.addTextToDebug('$key: Only Spritemaps made with Adobe Animate 2018 are supported');
+			if (PlayState.instance != null) PlayState.instance.addTextToDebug('$key: Only Spritemaps made with Adobe Animate 2018 are supported', FlxColor.RED);
 			trace('$key: Only Spritemaps made with Adobe Animate 2018 are supported');
 			return null;
 		}
 
 		var usedPath:String = Paths.getPath('images/$key/spritemap.png', IMAGE);
-		#if MODS_ALLOWED
-		if (FileSystem.exists(Paths.modsImages('$key/spritemap'))) {
-			usedPath = Paths.modsImages('$key/spritemap');
-		}
-		#end
 		if (framesLoaded.exists(usedPath)) {
 			return framesLoaded.get(usedPath);
 		}
@@ -122,7 +119,28 @@ class AtlasFrameMaker extends FlxFramesCollection
 		return daFramez;
 	}
 
-	public static function clearCache() { //clear loaded frames cause they might've changed
-		framesLoaded.clear();
+	#if sys
+	public static function cacheCharacterImages() {
+		var images:Array<String> = [];
+		for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/shared/images/characters")))
+		{
+			if (!i.contains('.'))
+				images.push(i);
+		}
+
+		if (images.length > 0) {
+			sys.thread.Thread.create(() ->
+			{
+				trace('caching ${images.length} atlases');
+				for (i in images)
+				{
+					var directory = 'assets/shared/images/characters/$i';
+					if (FileSystem.exists('$directory/Animation.json'))
+						construct('characters/$i');
+				}
+				trace('finished caching!');
+			});
+		}
 	}
+	#end
 }

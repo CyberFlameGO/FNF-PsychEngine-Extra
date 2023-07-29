@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxDestroyUtil;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
@@ -348,12 +349,36 @@ class Alphabet extends FlxSpriteGroup
 		super.update(elapsed);
 	}
 
+	public function instantlySetPosition() {
+		if (isMenuItem)
+		{
+			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
+			y = (scaledY * yMult) + (FlxG.height * 0.48) + yAdd;
+			if (forceX != Math.NEGATIVE_INFINITY) {
+				x = forceX;
+			} else {
+				x = (targetY * 20) + 90 + xAdd;
+			}
+		}
+	}
+
 	public function killTheTimer() {
 		if (typeTimer != null) {
 			typeTimer.cancel();
 			typeTimer.destroy();
 		}
 		typeTimer = null;
+	}
+
+	override public function destroy() {
+		super.destroy();
+		text = null;
+		_finalText = null;
+		lastSprite = null;
+		splitWords = null;
+		lettersArray = null;
+		dialogueSound = FlxDestroyUtil.destroy(dialogueSound);
+		killTheTimer();
 	}
 }
 
@@ -372,7 +397,7 @@ class AlphaCharacter extends FlxSprite
 		var tex = Paths.getSparrowAtlas('alphabet');
 		frames = tex;
 
-		setGraphicSize(Std.int(width * textSize));
+		scale.set(textSize, textSize);
 		updateHitbox();
 		this.textSize = textSize;
 		antialiasing = ClientPrefs.globalAntialiasing;

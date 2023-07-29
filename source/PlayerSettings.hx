@@ -47,6 +47,7 @@ class PlayerSettings
 			player1.controls.addDefaultGamepad(0);
 		}
 
+		/*
 		if (numGamepads > 1)
 		{
 			if (player2 == null)
@@ -57,10 +58,26 @@ class PlayerSettings
 
 			var gamepad = FlxG.gamepads.getByID(1);
 			if (gamepad == null)
-				throw 'Unexpected null gamepad. id:0';
+				throw 'Unexpected null gamepad. id:1';
 
 			player2.controls.addDefaultGamepad(1);
 		}
+		*/
+
+		FlxG.gamepads.deviceConnected.add(function(gamepad) {
+			if (gamepad.id == 0 && player1.controls.gamepadsAdded.length < 1 && !MainMenuState.inPvP) {
+				var gamepad = FlxG.gamepads.getByID(0);
+				if (gamepad == null)
+					throw 'Unexpected null gamepad. id:0';
+
+				player1.controls.addDefaultGamepad(0);
+			}
+		});
+		FlxG.gamepads.deviceDisconnected.add(function(gamepad) {
+			if (gamepad.id == 0 && player1.controls.gamepadsAdded.length > 0 && !MainMenuState.inPvP) {
+				player1.controls.removeGamepad(0);
+			}
+		});
 	}
 
 	static public function reset()

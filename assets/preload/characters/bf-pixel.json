@@ -1,110 +1,111 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
 				7,
 				0
 			],
+			"indices": [],
 			"fps": 24,
 			"anim": "idle",
-			"indices": [],
+			"loop": false,
 			"name": "BF IDLE"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singLEFTmiss",
-			"fps": 24,
-			"name": "BF LEFT MISS",
-			"indices": []
+			"loop": false,
+			"name": "BF LEFT MISS"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singLEFT",
-			"fps": 24,
-			"name": "BF LEFT NOTE",
-			"indices": []
+			"loop": false,
+			"name": "BF LEFT NOTE"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singUPmiss",
-			"fps": 24,
-			"name": "BF UP MISS",
-			"indices": []
+			"loop": false,
+			"name": "BF UP MISS"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singUP",
-			"fps": 24,
-			"name": "BF UP NOTE",
-			"indices": []
+			"loop": false,
+			"name": "BF UP NOTE"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singRIGHT",
-			"fps": 24,
-			"name": "BF RIGHT NOTE",
-			"indices": []
+			"loop": false,
+			"name": "BF RIGHT NOTE"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singRIGHTmiss",
-			"fps": 24,
-			"name": "BF RIGHT MISS",
-			"indices": []
+			"loop": false,
+			"name": "BF RIGHT MISS"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
+			"indices": [],
+			"fps": 24,
 			"anim": "singDOWN",
-			"fps": 24,
-			"name": "BF DOWN NOTE",
-			"indices": []
+			"loop": false,
+			"name": "BF DOWN NOTE"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"anim": "singDOWNmiss",
+			"indices": [],
 			"fps": 24,
-			"name": "BF DOWN MISS",
-			"indices": []
+			"anim": "singDOWNmiss",
+			"loop": false,
+			"name": "BF DOWN MISS"
 		}
 	],
+	"repeatHoldAnimation": true,
 	"no_antialiasing": true,
 	"image": "characters/bfPixel",
 	"position": [
-		0,
-		350
+		10,
+		330
 	],
 	"healthicon": "bf-pixel",
 	"flip_x": true,
@@ -114,8 +115,8 @@
 		246
 	],
 	"camera_position": [
-		50,
-		-60
+		-30,
+		100
 	],
 	"sing_duration": 4,
 	"scale": 6

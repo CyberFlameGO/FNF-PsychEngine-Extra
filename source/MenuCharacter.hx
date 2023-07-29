@@ -1,12 +1,6 @@
 package;
 
 import flixel.FlxSprite;
-#if MODS_ALLOWED
-import sys.io.File;
-import sys.FileSystem;
-#else
-import openfl.utils.Assets;
-#end
 import haxe.Json;
 
 typedef MenuCharacterFile = {
@@ -53,30 +47,17 @@ class MenuCharacter extends FlxSprite
 				var characterPath:String = 'images/menucharacters/$character.json';
 				var rawJson = null;
 
-				#if MODS_ALLOWED
-				var path:String = Paths.modFolders(characterPath);
-				if (!FileSystem.exists(path)) {
-					path = Paths.getPreloadPath(characterPath);
-				}
-
-				if (!FileSystem.exists(path)) {
+				var path:String = Paths.getPath(characterPath);
+				if (!Paths.exists(path, TEXT)) {
 					path = Paths.getPreloadPath('images/menucharacters/$DEFAULT_CHARACTER.json');
 				}
-				rawJson = File.getContent(path);
-
-				#else
-				var path:String = Paths.getPreloadPath(characterPath);
-				if (!Assets.exists(path)) {
-					path = Paths.getPreloadPath('images/menucharacters/$DEFAULT_CHARACTER.json');
-				}
-				rawJson = Assets.getText(path);
-				#end
+				rawJson = Paths.getContent(path);
 				
 				charFile = cast Json.parse(rawJson);
 
 				var imagePath = 'menucharacters/${charFile.image}';
-				if (Paths.fileExists('images/$imagePath/Animation.json', TEXT)) {
-					frames = animateatlas.AtlasFrameMaker.construct(imagePath);
+				if (Paths.existsPath('images/$imagePath/Animation.json', TEXT)) {
+					frames = AtlasFrameMaker.construct(imagePath);
 				} else {
 					frames = Paths.getSparrowAtlas(imagePath);
 				}
@@ -86,7 +67,7 @@ class MenuCharacter extends FlxSprite
 				if(confirmAnim != null && confirmAnim != charFile.idle_anim)
 				{
 					animation.addByPrefix('confirm', confirmAnim, 24, false);
-					if (animation.getByName('confirm') != null) //check for invalid animation
+					if (animation.exists('confirm')) //check for invalid animation
 						hasConfirmAnimation = true;
 				}
 

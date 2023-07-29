@@ -1,0 +1,197 @@
+{
+	"animations": [
+		{
+			"enemyOffsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "Tankman Idle Dance",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"enemyOffsets": [
+				48,
+				54
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "Tankman UP note 1",
+			"playerOffsets": [
+				28,
+				54
+			]
+		},
+		{
+			"enemyOffsets": [
+				76,
+				-101
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "Tankman DOWN note 1",
+			"playerOffsets": [
+				76,
+				-101
+			]
+		},
+		{
+			"enemyOffsets": [
+				-15,
+				-8
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP-alt",
+			"loop": false,
+			"name": "TANKMAN UGH",
+			"playerOffsets": [
+				-15,
+				-8
+			]
+		},
+		{
+			"enemyOffsets": [
+				1,
+				16
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN-alt",
+			"loop": false,
+			"name": "PRETTY GOOD tankman",
+			"playerOffsets": [
+				100,
+				16
+			]
+		},
+		{
+			"enemyOffsets": [
+				41,
+				54
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUPmiss",
+			"loop": false,
+			"name": "Tankman UP note MISS",
+			"playerOffsets": [
+				17,
+				54
+			]
+		},
+		{
+			"enemyOffsets": [
+				76,
+				-101
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"loop": false,
+			"name": "Tankman DOWN note MISS",
+			"playerOffsets": [
+				76,
+				-101
+			]
+		},
+		{
+			"enemyOffsets": [
+				-29,
+				-31
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "Tankman Note Left 1",
+			"playerOffsets": [
+				95,
+				-29
+			]
+		},
+		{
+			"enemyOffsets": [
+				85,
+				-9
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "Tankman Right Note 1",
+			"playerOffsets": [
+				-25,
+				-10
+			]
+		},
+		{
+			"enemyOffsets": [
+				-26,
+				-28
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFTmiss",
+			"loop": false,
+			"name": "Tankman Note Left MISS",
+			"playerOffsets": [
+				103,
+				-34
+			]
+		},
+		{
+			"enemyOffsets": [
+				89,
+				-10
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"loop": false,
+			"name": "Tankman Right Note MISS",
+			"playerOffsets": [
+				-9,
+				-12
+			]
+		}
+	],
+	"enemy_position": [
+		-30,
+		240
+	],
+	"repeatHoldAnimation": true,
+	"no_antialiasing": false,
+	"image": "characters/tankmanCaptain",
+	"enemy_cameraPosition": [
+		0,
+		50
+	],
+	"player_cameraPosition": [
+		0,
+		50
+	],
+	"healthicon": "tankman",
+	"flip_x": true,
+	"healthbar_colors": [
+		225,
+		225,
+		225
+	],
+	"player_position": [
+		30,
+		240
+	],
+	"sing_duration": 4,
+	"scale": 1
+}

@@ -3,13 +3,13 @@ package editors;
 #if DISCORD_ALLOWED
 import Discord.DiscordClient;
 #end
-import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
@@ -22,8 +22,7 @@ import haxe.Json;
 import DialogueBoxPsych;
 import flixel.FlxCamera;
 import flixel.group.FlxSpriteGroup;
-import lime.system.Clipboard;
-#if MODS_ALLOWED
+#if sys
 import sys.io.File;
 #end
 
@@ -68,6 +67,8 @@ class DialogueCharacterEditorState extends MusicBeatState
 	var curAnim:Int = 0;
 
 	override function create() {
+		super.create();
+		
 		Alphabet.setDialogueSound();
 
 		persistentUpdate = true;
@@ -79,7 +80,6 @@ class DialogueCharacterEditorState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.setDefaultDrawTarget(camGame, false);
 		FlxG.cameras.add(camOther);
-		FlxG.cameras.setDefaultDrawTarget(camOther, true);
 		
 		mainGroup = new FlxSpriteGroup();
 		mainGroup.cameras = [camGame];
@@ -151,8 +151,6 @@ class DialogueCharacterEditorState extends MusicBeatState
 		addEditorBox();
 		FlxG.mouse.visible = true;
 		updateCharTypeBox();
-		
-		super.create();
 	}
 
 	var UI_typebox:FlxUITabMenu;
@@ -166,7 +164,6 @@ class DialogueCharacterEditorState extends MusicBeatState
 		UI_typebox.x = 900;
 		UI_typebox.y = FlxG.height - UI_typebox.height - 50;
 		UI_typebox.scrollFactor.set();
-		UI_typebox.camera = camGame;
 		addTypeUI();
 		add(UI_typebox);
 
@@ -179,7 +176,6 @@ class DialogueCharacterEditorState extends MusicBeatState
 		UI_mainbox.x = UI_typebox.x + UI_typebox.width;
 		UI_mainbox.y = FlxG.height - UI_mainbox.height - 50;
 		UI_mainbox.scrollFactor.set();
-		UI_mainbox.camera = camGame;
 		addAnimationsUI();
 		addCharacterUI();
 		add(UI_mainbox);
@@ -223,7 +219,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 	var curSelectedAnim:String;
 	var animationArray:Array<String> = [];
-	var animationDropDown:FlxUIDropDownMenuCustom;
+	var animationDropDown:FlxUIDropDownMenu;
 	var animationInputText:FlxUIInputText;
 	var loopInputText:FlxUIInputText;
 	var idleInputText:FlxUIInputText;
@@ -231,7 +227,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 		var tab_group = new FlxUI(null, UI_mainbox);
 		tab_group.name = "Animations";
 
-		animationDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(animation:String) {
+		animationDropDown = new FlxUIDropDownMenu(10, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(animation:String) {
 			var anim:String = animationArray[Std.parseInt(animation)];
 			if (character.dialogueAnimations.exists(anim)) {
 				ghostLoop.playAnim(anim);
@@ -341,7 +337,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 		}
 
 		if (animationArray.length < 1) animationArray = [''];
-		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(animationArray, true));
+		animationDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(animationArray, true));
 	}
 
 	var imageInputText:FlxUIInputText;
@@ -377,7 +373,6 @@ class DialogueCharacterEditorState extends MusicBeatState
 		tab_group.add(noAntialiasingCheckbox);
 
 		var reloadImageButton:FlxButton = new FlxButton(10, scaleStepper.y + 60, "Reload Image", function() {
-			AtlasFrameMaker.clearCache();
 			reloadCharacter();
 		});
 		
@@ -428,7 +423,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 		var charsArray:Array<DialogueCharacter> = [character, ghostLoop, ghostIdle];
 		for (char in charsArray) {
 			var imagePath = 'dialogue/${character.jsonFile.image}';
-			if (Paths.fileExists('images/$imagePath/Animation.json', TEXT)) {
+			if (Paths.existsPath('images/$imagePath/Animation.json', TEXT)) {
 				char.frames = AtlasFrameMaker.construct(imagePath);
 			} else {
 				char.frames = Paths.getSparrowAtlas(imagePath);
@@ -528,13 +523,30 @@ class DialogueCharacterEditorState extends MusicBeatState
 				FlxG.sound.volumeUpKeys = [];
 				blockInput = true;
 
-				if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { //Copy paste
-					inputText.text = ClipboardAdd(inputText.text);
-					inputText.caretIndex = inputText.text.length;
-					getEvent(FlxUIInputText.CHANGE_EVENT, inputText, null, []);
-				}
-				if (FlxG.keys.justPressed.ENTER) inputText.hasFocus = false;
+				if (FlxG.keys.justPressed.ENTER)
+					inputText.hasFocus = false;
 				break;
+			}
+		}
+
+		if (!blockInput) {
+			var blockPressWhileTypingOnStepper = [xStepper, yStepper, scaleStepper];
+			for (stepper in blockPressWhileTypingOnStepper) {
+				@:privateAccess
+				var leText:Dynamic = stepper.text_field;
+				var leText:FlxUIInputText = leText;
+				if (leText.hasFocus) {
+					FlxG.sound.muteKeys = [];
+					FlxG.sound.volumeDownKeys = [];
+					FlxG.sound.volumeUpKeys = [];
+					blockInput = true;
+
+					if (FlxG.keys.justPressed.ENTER) {
+						leText.hasFocus = false;
+						leText.focusLost();
+					}
+					break;
+				}
 			}
 		}
 
@@ -687,7 +699,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 			if (FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
+				CoolUtil.playMenuMusic();
 				transitioning = true;
 			}
 
@@ -711,43 +723,44 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 	function onLoadComplete(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 
-		#if MODS_ALLOWED
-		var fullPath:String = null;
-		@:privateAccess
-		if (_file.__path != null) fullPath = _file.__path;
+			#if sys
+			var fullPath:String = null;
+			@:privateAccess
+			if (_file.__path != null) fullPath = _file.__path;
 
-		if (fullPath != null) {
-			var rawJson:String = File.getContent(fullPath);
-			if (rawJson != null) {
-				var loadedChar:DialogueCharacterFile = cast Json.parse(rawJson);
-				if (loadedChar.dialogue_pos != null) //Make sure it's really a dialogue character
-				{
-					AtlasFrameMaker.clearCache();
-					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace('Successfully loaded file: $cutName');
-					character.jsonFile = loadedChar;
-					reloadCharacter();
-					reloadAnimationsDropDown();
-					updateCharTypeBox();
-					updateTextBox();
-					reloadText();
-					imageInputText.text = character.jsonFile.image;
-					scaleStepper.value = character.jsonFile.scale;
-					xStepper.value = character.jsonFile.position[0];
-					yStepper.value = character.jsonFile.position[1];
-					_file = null;
-					return;
+			if (fullPath != null) {
+				var rawJson:String = File.getContent(fullPath);
+				if (rawJson != null) {
+					var loadedChar:DialogueCharacterFile = cast Json.parse(rawJson);
+					if (loadedChar.dialogue_pos != null) //Make sure it's really a dialogue character
+					{
+						var cutName:String = _file.name.substr(0, _file.name.length - 5);
+						trace('Successfully loaded file: $cutName');
+						character.jsonFile = loadedChar;
+						reloadCharacter();
+						reloadAnimationsDropDown();
+						updateCharTypeBox();
+						updateTextBox();
+						reloadText();
+						imageInputText.text = character.jsonFile.image;
+						scaleStepper.value = character.jsonFile.scale;
+						xStepper.value = character.jsonFile.position[0];
+						yStepper.value = character.jsonFile.position[1];
+						_file = null;
+						return;
+					}
 				}
 			}
+			_file = null;
+			#else
+			trace("File couldn't be loaded! You aren't on Desktop, are you?");
+			#end
 		}
-		_file = null;
-		#else
-		trace("File couldn't be loaded! You aren't on Desktop, are you?");
-		#end
 	}
 
 	/**
@@ -755,11 +768,13 @@ class DialogueCharacterEditorState extends MusicBeatState
 		*/
 	function onLoadCancel(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
-		trace("Cancelled file loading.");
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			_file = null;
+			trace("Cancelled file loading.");
+		}
 	}
 
 	/**
@@ -767,11 +782,13 @@ class DialogueCharacterEditorState extends MusicBeatState
 		*/
 	function onLoadError(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
-		trace("Problem loading file");
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			_file = null;
+			trace("Problem loading file");
+		}
 	}
 
 	function saveCharacter() {
@@ -791,11 +808,13 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 	function onSaveComplete(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.notice("Successfully saved file.");
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.notice("Successfully saved file.");
+		}
 	}
 
 	/**
@@ -803,10 +822,12 @@ class DialogueCharacterEditorState extends MusicBeatState
 		*/
 	function onSaveCancel(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+		}
 	}
 
 	/**
@@ -814,20 +835,12 @@ class DialogueCharacterEditorState extends MusicBeatState
 		*/
 	function onSaveError(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving file");
-	}
-
-	function ClipboardAdd(prefix:String = ''):String {
-		if (prefix.toLowerCase().endsWith('v')) //probably copy paste attempt
-		{
-			prefix = prefix.substring(0, prefix.length-1);
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.error("Problem saving file");
 		}
-
-		var text:String = prefix + Clipboard.text.replace('\n', '');
-		return text;
 	}
 }

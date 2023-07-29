@@ -2,7 +2,7 @@
 
 name: Build
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
@@ -27,10 +27,12 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.4
+          haxe-version: 4.2.5
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
+          sudo apt-get install libvlc-dev
+          sudo apt-get install libvlccore-dev
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null
           haxelib install lime
@@ -38,8 +40,13 @@ jobs:
           haxelib --never install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib git linc_luajit https://github.com/AndreiRudenko/linc_luajit
+          haxelib install flixel-tools
+          haxelib install flixel-ui
+          haxelib install flixel-addons
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib git hscript https://github.com/HaxeFoundation/hscript
+          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
           haxelib list
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
@@ -59,7 +66,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.4
+          haxe-version: 4.2.5
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -70,8 +77,14 @@ jobs:
           haxelib --never install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib git linc_luajit https://github.com/AndreiRudenko/linc_luajit
+          haxelib install flixel-tools
+          haxelib install flixel-ui
+          haxelib install flixel-addons
+          haxelib install hxCodec
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib git hscript https://github.com/HaxeFoundation/hscript
+          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
           haxelib list
         shell: cmd
       - name: Create Version Tag
@@ -92,7 +105,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.4
+          haxe-version: 4.2.5
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -103,8 +116,13 @@ jobs:
           haxelib --never install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib git linc_luajit https://github.com/AndreiRudenko/linc_luajit
+          haxelib install flixel-tools
+          haxelib install flixel-ui
+          haxelib install flixel-addons
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib git hscript https://github.com/HaxeFoundation/hscript
+          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
           haxelib list
         shell: cmd
       - name: Create Version Tag
@@ -125,7 +143,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.4
+          haxe-version: 4.2.5
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -136,8 +154,13 @@ jobs:
           haxelib --never install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib git linc_luajit https://github.com/AndreiRudenko/linc_luajit
+          haxelib install flixel-tools
+          haxelib install flixel-ui
+          haxelib install flixel-addons
+          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib git hscript https://github.com/HaxeFoundation/hscript
+          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
           haxelib list
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
@@ -157,7 +180,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.4
+          haxe-version: 4.2.5
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -168,6 +191,12 @@ jobs:
           haxelib --never install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
+          haxelib install flixel-tools
+          haxelib install flixel-ui
+          haxelib install flixel-addons
+          haxelib git hscript https://github.com/HaxeFoundation/hscript
+          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
+          haxelib install hxCodec
           haxelib list
         shell: cmd
       - name: Create Version Tag

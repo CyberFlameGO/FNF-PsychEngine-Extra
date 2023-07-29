@@ -22,7 +22,7 @@ import openfl.events.IOErrorEvent;
 import flash.net.FileFilter;
 import lime.system.Clipboard;
 import haxe.Json;
-#if MODS_ALLOWED
+#if sys
 import sys.io.File;
 import sys.FileSystem;
 #end
@@ -50,6 +50,8 @@ class WeekEditorState extends MusicBeatState
 	}
 
 	override function create() {
+		super.create();
+
 		txtWeekTitle = new FlxText(FlxG.width * 0.7, 10, 0, "", 32);
 		txtWeekTitle.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, RIGHT);
 		txtWeekTitle.alpha = 0.7;
@@ -109,8 +111,6 @@ class WeekEditorState extends MusicBeatState
 		reloadAllShit();
 
 		FlxG.mouse.visible = true;
-
-		super.create();
 	}
 
 	var UI_box:FlxUITabMenu;
@@ -184,7 +184,6 @@ class WeekEditorState extends MusicBeatState
 		backgroundInputText = new FlxUIInputText(10, opponentInputText.y + 40, 120, '', 8);
 		blockPressWhileTypingOn.push(backgroundInputText);
 		
-
 		displayNameInputText = new FlxUIInputText(10, backgroundInputText.y + 60, 200, '', 8);
 		blockPressWhileTypingOn.push(backgroundInputText);
 
@@ -327,7 +326,7 @@ class WeekEditorState extends MusicBeatState
 
 		var isMissing:Bool = true;
 		if (assetName != null && assetName.length > 0) {
-			if (Paths.fileExists('images/menubackgrounds/menu_$assetName.png', IMAGE)) {
+			if (Paths.existsPath('images/menubackgrounds/menu_$assetName.png', IMAGE)) {
 				bgSprite.loadGraphic(Paths.image('menubackgrounds/menu_$assetName'));
 				isMissing = false;
 			}
@@ -345,7 +344,7 @@ class WeekEditorState extends MusicBeatState
 		
 		var isMissing:Bool = true;
 		if (assetName != null && assetName.length > 0) {
-			if (Paths.fileExists('images/storymenu/$assetName.png', IMAGE)) {
+			if (Paths.existsPath('images/storymenu/$assetName.png', IMAGE)) {
 				weekThing.loadGraphic(Paths.image('storymenu/$assetName'));
 				isMissing = false;
 			}
@@ -441,7 +440,7 @@ class WeekEditorState extends MusicBeatState
 			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
 			if (FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				CoolUtil.playMenuMusic();
 			}
 		}
 
@@ -470,49 +469,53 @@ class WeekEditorState extends MusicBeatState
 	public static var loadError:Bool = false;
 	private static function onLoadComplete(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 
-		#if MODS_ALLOWED
-		var fullPath:String = null;
-		@:privateAccess
-		if (_file.__path != null) fullPath = _file.__path;
+			#if sys
+			var fullPath:String = null;
+			@:privateAccess
+			if (_file.__path != null) fullPath = _file.__path;
 
-		if (fullPath != null) {
-			var rawJson:String = File.getContent(fullPath);
-			if (rawJson != null) {
-				loadedWeek = cast Json.parse(rawJson);
-				if (loadedWeek.weekCharacters != null && loadedWeek.weekName != null) //Make sure it's really a week
-				{
-					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace('Successfully loaded file: $cutName');
-					loadError = false;
+			if (fullPath != null) {
+				var rawJson:String = File.getContent(fullPath);
+				if (rawJson != null) {
+					loadedWeek = cast Json.parse(rawJson);
+					if (loadedWeek.weekCharacters != null && loadedWeek.weekName != null) //Make sure it's really a week
+					{
+						var cutName:String = _file.name.substr(0, _file.name.length - 5);
+						trace('Successfully loaded file: $cutName');
+						loadError = false;
 
-					weekFileName = cutName;
-					_file = null;
-					return;
+						weekFileName = cutName;
+						_file = null;
+						return;
+					}
 				}
 			}
+			loadError = true;
+			loadedWeek = null;
+			_file = null;
+			#else
+			trace("File couldn't be loaded! You aren't on Desktop, are you?");
+			#end
 		}
-		loadError = true;
-		loadedWeek = null;
-		_file = null;
-		#else
-		trace("File couldn't be loaded! You aren't on Desktop, are you?");
-		#end
 	}
 
 	/**
 		* Called when the save file dialog is cancelled.
-		*/
-		private static function onLoadCancel(_):Void
+	*/
+	private static function onLoadCancel(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
-		trace("Cancelled file loading.");
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			_file = null;
+			trace("Cancelled file loading.");
+		}
 	}
 
 	/**
@@ -520,11 +523,13 @@ class WeekEditorState extends MusicBeatState
 		*/
 	private static function onLoadError(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
-		trace("Problem loading file");
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			_file = null;
+			trace("Problem loading file");
+		}
 	}
 
 	public static function saveWeek(weekFile:WeekFile) {
@@ -541,22 +546,26 @@ class WeekEditorState extends MusicBeatState
 	
 	private static function onSaveComplete(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.notice("Successfully saved file.");
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.notice("Successfully saved file.");
+		}
 	}
 
 	/**
 		* Called when the save file dialog is cancelled.
 		*/
-		private static function onSaveCancel(_):Void
+	private static function onSaveCancel(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+		}
 	}
 
 	/**
@@ -564,11 +573,13 @@ class WeekEditorState extends MusicBeatState
 		*/
 	private static function onSaveError(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving file");
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.error("Problem saving file");
+		}
 	}
 }
 
@@ -589,6 +600,8 @@ class WeekEditorFreeplayState extends MusicBeatState
 	var curSelected = 0;
 
 	override function create() {
+		super.create();
+		
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 
@@ -615,7 +628,6 @@ class WeekEditorFreeplayState extends MusicBeatState
 
 		addEditorBox();
 		changeSelection();
-		super.create();
 	}
 	
 	var UI_box:FlxUITabMenu;
@@ -737,7 +749,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 	}
 
 	function changeSelection(change:Int = 0) {
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		CoolUtil.playScrollSound();
 
 		curSelected += change;
 
@@ -774,6 +786,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 		updateBG();
 	}
 
+	var holdTime:Float = 0;
 	override function update(elapsed:Float) {
 		FlxG.mouse.visible = true;//cause reasons. trust me 
 		if (WeekEditorState.loadedWeek != null) {
@@ -784,25 +797,74 @@ class WeekEditorFreeplayState extends MusicBeatState
 			WeekEditorState.loadedWeek = null;
 			return;
 		}
-		
-		if (iconInputText.hasFocus) {
-			FlxG.sound.muteKeys = [];
-			FlxG.sound.volumeDownKeys = [];
-			FlxG.sound.volumeUpKeys = [];
-			if (FlxG.keys.justPressed.ENTER) {
-				iconInputText.hasFocus = false;
+
+		var blockInput:Bool = false;
+		var blockPressWhileTypingOn = [iconInputText];
+		for (inputText in blockPressWhileTypingOn) {
+			if (inputText.hasFocus) {
+				FlxG.sound.muteKeys = [];
+				FlxG.sound.volumeDownKeys = [];
+				FlxG.sound.volumeUpKeys = [];
+				blockInput = true;
+
+				if (FlxG.keys.justPressed.ENTER) {
+					inputText.hasFocus = false;
+				}
+				break;
 			}
-		} else {
+		}
+
+		if (!blockInput) {
+			var blockPressWhileTypingOnStepper = [bgColorStepperR, bgColorStepperG, bgColorStepperB];
+			for (stepper in blockPressWhileTypingOnStepper) {
+				@:privateAccess
+				var leText:Dynamic = stepper.text_field;
+				var leText:FlxUIInputText = leText;
+				if (leText.hasFocus) {
+					FlxG.sound.muteKeys = [];
+					FlxG.sound.volumeDownKeys = [];
+					FlxG.sound.volumeUpKeys = [];
+					blockInput = true;
+
+					if (FlxG.keys.justPressed.ENTER) {
+						leText.hasFocus = false;
+						leText.focusLost();
+					}
+					break;
+				}
+			}
+		}
+		
+		if (!blockInput) {
 			FlxG.sound.muteKeys = TitleState.muteKeys;
 			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
 			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
 			if (FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				CoolUtil.playMenuMusic();
 			}
 
-			if (controls.UI_UP_P || FlxG.mouse.wheel > 0) changeSelection(-1);
-			if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0) changeSelection(1);
+			if (controls.UI_UP_P || FlxG.mouse.wheel > 0) {
+				changeSelection(-1);
+				holdTime = 0;
+			}
+			if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0) {
+				changeSelection(1);
+				holdTime = 0;
+			}
+			var down = controls.UI_DOWN;
+			var up = controls.UI_UP;
+			if (down || up)
+			{
+				var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
+				holdTime += elapsed;
+				var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+
+				if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
+				{
+					changeSelection((checkNewHold - checkLastHold) * (up ? -1 : 1));
+				}
+			}
 		}
 		super.update(elapsed);
 	}

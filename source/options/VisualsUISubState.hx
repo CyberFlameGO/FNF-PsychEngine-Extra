@@ -11,18 +11,11 @@ class VisualsUISubState extends BaseOptionsMenu
 		title = 'Visuals and UI';
 		rpcTitle = 'Visuals & UI Settings Menu'; //for Discord Rich Presence
 
-		var option:Option = new Option('Player Note Splashes',
+		var option:Option = new Option('Note Splashes',
 			"If unchecked, hitting \"Sick!\" notes won't show particles.",
 			'noteSplashes',
 			'bool',
 			true);
-		addOption(option);
-
-		var option:Option = new Option('Opponent Note Splashes',
-			"If unchecked, the opponent hitting \"Sick!\" notes won't show particles.",
-			'noteSplashesOpponent',
-			'bool',
-			false);
 		addOption(option);
 
 		var option:Option = new Option('Hide HUD',
@@ -37,7 +30,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'timeBarType',
 			'string',
 			'Time Left',
-			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
+			['Time Left', 'Time Elapsed', 'Song Name', 'Percentage Passed', 'Disabled']);
 		addOption(option);
 
 		var option:Option = new Option('Flashing Lights',
@@ -69,7 +62,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Note Underlay Transparency',
-			'How visible the note backgrounds should be.',
+			'How visible the background behind the notes should be.',
 			'underlayAlpha',
 			'percent',
 			0);
@@ -78,6 +71,20 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.maxValue = 1;
 		option.changeValue = 0.1;
 		option.decimals = 1;
+		addOption(option);
+
+		var option:Option = new Option('Full Underlay',
+			"If checked, the note underlay will fill up the whole screen instead of just the notes. Works better for modcharts.",
+			'underlayFull',
+			'bool',
+			false);
+		addOption(option);
+
+		var option:Option = new Option('Keybind Reminders',
+			'If checked, shows your note keybinds when starting a song.',
+			'keybindReminders',
+			'bool',
+			true);
 		addOption(option);
 
 		var option:Option = new Option('Health Bar Transparency',
@@ -92,14 +99,13 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 
-		var option:Option = new Option('Sort Freeplay Alphabetically',
-			'If checked, songs in the Freeplay menu will be sorted alphabetically.',
-			'freeplayAlphabetic',
+		var option:Option = new Option('Smooth Health Bar',
+			'If checked, the health bar will move smoother.',
+			'smoothHealth',
 			'bool',
-			false);
+			true);
 		addOption(option);
 		
-		#if !mobile
 		var option:Option = new Option('FPS & Memory Counter',
 			'If unchecked, hides the FPS & memory counter.',
 			'showFPS',
@@ -107,7 +113,19 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
-		#end
+
+		var option:Option = new Option('Menu Music Volume',
+			'How loud the background menu music should be.',
+			'menuMusicVolume',
+			'percent',
+			1);
+		option.scrollSpeed = 1.6;
+		option.minValue = 0.0;
+		option.maxValue = 1;
+		option.changeValue = 0.1;
+		option.decimals = 1;
+		option.onChange = onChangeMenuMusicVolume;
+		addOption(option);
 
 		var option:Option = new Option('Pause Screen Song:',
 			"What song do you prefer for the Pause Screen?",
@@ -117,6 +135,15 @@ class VisualsUISubState extends BaseOptionsMenu
 			['None', 'Breakfast', 'Tea Time']);
 		addOption(option);
 		option.onChange = onChangePauseMusic;
+
+		#if CHECK_FOR_UPDATES
+		var option:Option = new Option('Check for Updates',
+			'On Release builds, turn this on to check for updates when you start the game.',
+			'checkForUpdates',
+			'bool',
+			true);
+		addOption(option);
+		#end
 
 		super();
 	}
@@ -134,15 +161,18 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic) FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		if(changedMusic) CoolUtil.playMenuMusic();
 		super.destroy();
 	}
 
-	#if !mobile
 	function onChangeFPSCounter()
 	{
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.showFPS;
 	}
-	#end
+
+	function onChangeMenuMusicVolume()
+	{
+		FlxG.sound.music.volume = ClientPrefs.menuMusicVolume;
+	}
 }

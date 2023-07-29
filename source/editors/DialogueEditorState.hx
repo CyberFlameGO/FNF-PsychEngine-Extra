@@ -19,8 +19,7 @@ import openfl.events.IOErrorEvent;
 import flash.net.FileFilter;
 import haxe.Json;
 import DialogueBoxPsych;
-import lime.system.Clipboard;
-#if MODS_ALLOWED
+#if sys
 import sys.io.File;
 #end
 
@@ -39,6 +38,8 @@ class DialogueEditorState extends MusicBeatState
 	var dialogueFile:DialogueFile = null;
 
 	override function create() {
+		super.create();
+		
 		persistentUpdate = true;
 		FlxG.camera.bgColor = FlxColor.fromHSL(0, 0, 0.5);
 
@@ -93,7 +94,6 @@ class DialogueEditorState extends MusicBeatState
 		animText.scrollFactor.set();
 		add(animText);
 		changeText();
-		super.create();
 	}
 
 	var UI_box:FlxUITabMenu;
@@ -192,8 +192,8 @@ class DialogueEditorState extends MusicBeatState
 
 	function reloadCharacter() {
 		var imagePath = 'dialogue/${character.jsonFile.image}';
-		if (Paths.fileExists('images/$imagePath/Animation.json', TEXT)) {
-			character.frames = animateatlas.AtlasFrameMaker.construct(imagePath);
+		if (Paths.existsPath('images/$imagePath/Animation.json', TEXT)) {
+			character.frames = AtlasFrameMaker.construct(imagePath);
 		} else {
 			character.frames = Paths.getSparrowAtlas(imagePath);
 		}
@@ -217,7 +217,7 @@ class DialogueEditorState extends MusicBeatState
 		character.playAnim(); //Plays random animation
 		characterAnimSpeed();
 
-		if (character.animation.curAnim != null) {
+		if(character.animation.curAnim != null && character.jsonFile.animations != null) {
 			animText.text = 'Animation: ${character.jsonFile.animations[curAnim].anim} (${curAnim + 1} / ${character.jsonFile.animations.length}) - Press W or S to scroll';
 		} else {
 			animText.text = 'ERROR! NO ANIMATIONS FOUND';
@@ -255,7 +255,7 @@ class DialogueEditorState extends MusicBeatState
 		// Updating Discord Rich Presence
 		var rpcText:String = lineInputText.text;
 		if (rpcText == null || rpcText.length < 1) rpcText = '(Empty)';
-		if (rpcText.length < 3) rpcText += '  '; //Fixes a bug on RPC that triggers an error when the text is too short
+		if (rpcText.length < 3) rpcText += '   '; //Fixes a bug on RPC that triggers an error when the text is too short
 		DiscordClient.changePresence("Dialogue Editor", rpcText);
 		#end
 	}
@@ -328,11 +328,6 @@ class DialogueEditorState extends MusicBeatState
 				FlxG.sound.volumeUpKeys = [];
 				blockInput = true;
 
-				if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { //Copy paste
-					inputText.text = ClipboardAdd(inputText.text);
-					inputText.caretIndex = inputText.text.length;
-					getEvent(FlxUIInputText.CHANGE_EVENT, inputText, null, []);
-				}
 				if (FlxG.keys.justPressed.ENTER) {
 					if (inputText == lineInputText) {
 						inputText.text += '\\n';
@@ -346,6 +341,32 @@ class DialogueEditorState extends MusicBeatState
 		}
 
 		if (!blockInput) {
+			var blockPressWhileTypingOnStepper = [speedStepper];
+			for (stepper in blockPressWhileTypingOnStepper) {
+				@:privateAccess
+				var leText:Dynamic = stepper.text_field;
+				var leText:FlxUIInputText = leText;
+				if (leText.hasFocus) {
+					FlxG.sound.muteKeys = [];
+					FlxG.sound.volumeDownKeys = [];
+					FlxG.sound.volumeUpKeys = [];
+					blockInput = true;
+
+					if (FlxG.keys.justPressed.ENTER) {
+						if (leText == lineInputText) {
+							leText.text += '\\n';
+							leText.caretIndex += 2;
+						} else {
+							leText.hasFocus = false;
+							leText.focusLost();
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		if (!blockInput) {
 			FlxG.sound.muteKeys = TitleState.muteKeys;
 			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
 			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
@@ -354,7 +375,7 @@ class DialogueEditorState extends MusicBeatState
 			}
 			if (FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
+				CoolUtil.playMenuMusic();
 				transitioning = true;
 			}
 			var negaMult:Array<Int> = [1, -1];
@@ -441,16 +462,6 @@ class DialogueEditorState extends MusicBeatState
 		}
 	}
 
-	function ClipboardAdd(prefix:String = ''):String {
-		if (prefix.toLowerCase().endsWith('v')) //probably copy paste attempt
-		{
-			prefix = prefix.substring(0, prefix.length-1);
-		}
-
-		var text:String = prefix + Clipboard.text.replace('\n', '');
-		return text;
-	}
-
 	var _file:FileReference = null;
 	function loadDialogue() {
 		var jsonFilter:FileFilter = new FileFilter('JSON', 'json');
@@ -463,34 +474,36 @@ class DialogueEditorState extends MusicBeatState
 
 	function onLoadComplete(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 
-		#if MODS_ALLOWED
-		var fullPath:String = null;
-		@:privateAccess
-		if (_file.__path != null) fullPath = _file.__path;
+			#if sys
+			var fullPath:String = null;
+			@:privateAccess
+			if (_file.__path != null) fullPath = _file.__path;
 
-		if (fullPath != null) {
-			var rawJson:String = File.getContent(fullPath);
-			if (rawJson != null) {
-				var loadedDialog:DialogueFile = cast Json.parse(rawJson);
-				if (loadedDialog.dialogue != null && loadedDialog.dialogue.length > 0) //Make sure it's really a dialogue file
-				{
-					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace('Successfully loaded file: $cutName');
-					dialogueFile = loadedDialog;
-					changeText();
-					_file = null;
-					return;
+			if (fullPath != null) {
+				var rawJson:String = File.getContent(fullPath);
+				if (rawJson != null) {
+					var loadedDialog:DialogueFile = cast Json.parse(rawJson);
+					if (loadedDialog.dialogue != null && loadedDialog.dialogue.length > 0) //Make sure it's really a dialogue file
+					{
+						var cutName:String = _file.name.substr(0, _file.name.length - 5);
+						trace('Successfully loaded file: $cutName');
+						dialogueFile = loadedDialog;
+						changeText();
+						_file = null;
+						return;
+					}
 				}
 			}
+			_file = null;
+			#else
+			trace("File couldn't be loaded! You aren't on Desktop, are you?");
+			#end
 		}
-		_file = null;
-		#else
-		trace("File couldn't be loaded! You aren't on Desktop, are you?");
-		#end
 	}
 
 	/**
@@ -498,11 +511,13 @@ class DialogueEditorState extends MusicBeatState
 		*/
 	function onLoadCancel(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
-		trace("Cancelled file loading.");
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			_file = null;
+			trace("Cancelled file loading.");
+		}
 	}
 
 	/**
@@ -510,11 +525,13 @@ class DialogueEditorState extends MusicBeatState
 		*/
 	function onLoadError(_):Void
 	{
-		_file.removeEventListener(Event.SELECT, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
-		trace("Problem loading file");
+		if (_file != null) {
+			_file.removeEventListener(Event.SELECT, onLoadComplete);
+			_file.removeEventListener(Event.CANCEL, onLoadCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			_file = null;
+			trace("Problem loading file");
+		}
 	}
 
 	function saveDialogue() {
@@ -531,11 +548,13 @@ class DialogueEditorState extends MusicBeatState
 
 	function onSaveComplete(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.notice("Successfully saved file.");
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.notice("Successfully saved file.");
+		}
 	}
 
 	/**
@@ -543,10 +562,12 @@ class DialogueEditorState extends MusicBeatState
 		*/
 	function onSaveCancel(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+		}
 	}
 
 	/**
@@ -554,10 +575,12 @@ class DialogueEditorState extends MusicBeatState
 		*/
 	function onSaveError(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving file");
+		if (_file != null) {
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.error("Problem saving file");
+		}
 	}
 }

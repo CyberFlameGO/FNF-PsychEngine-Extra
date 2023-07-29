@@ -1,1 +1,1 @@
-Drop your UI skin files here!
+Put your custom UI skins here!

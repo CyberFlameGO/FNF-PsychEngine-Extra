@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxDestroyUtil;
 #if DISCORD_ALLOWED
 import Discord.DiscordClient;
 #end
@@ -15,14 +16,15 @@ using StringTools;
 class AchievementsMenuState extends MusicBeatState
 {
 	#if ACHIEVEMENTS_ALLOWED
-	var options:Array<String> = [];
+	var achievements:Array<AchievementFile> = [];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	private var achievementArray:Array<AttachedAchievement> = [];
-	private var achievementIndex:Array<Int> = [];
 	private var descText:FlxText;
 
 	override function create() {
+		super.create();
+		
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Achievements Menu", null);
 		#end
@@ -39,15 +41,13 @@ class AchievementsMenuState extends MusicBeatState
 		
 		Achievements.loadAchievements();
 		for (i in 0...Achievements.achievementsStuff.length) {
-			if (!Achievements.achievementsStuff[i][4] || Achievements.achievementsMap.exists(Achievements.achievementsStuff[i][2])) {
-				options.push(Achievements.achievementsStuff[i]);
-				achievementIndex.push(i);
-			}
+			if (!Achievements.achievementsStuff[i].hiddenUntilUnlocked || Achievements.achievementsMap.exists(Achievements.achievementsStuff[i].name))
+				achievements.push(Achievements.achievementsStuff[i]);
 		}
 
-		for (i in 0...options.length) {
-			var achieveName:String = Achievements.achievementsStuff[achievementIndex[i]][2];
-			var optionText:Alphabet = new Alphabet(0, (100 * i) + 210, Achievements.isAchievementUnlocked(achieveName) ? Achievements.achievementsStuff[achievementIndex[i]][0] : '?', false, false);
+		for (i in 0...achievements.length) {
+			var achieveName:String = achievements[i].name;
+			var optionText:Alphabet = new Alphabet(0, (100 * i) + 210, Achievements.isAchievementUnlocked(achieveName) ? achievements[i].displayName : '?');
 			optionText.isMenuItem = true;
 			optionText.x += 280;
 			optionText.xAdd = 200;
@@ -66,22 +66,36 @@ class AchievementsMenuState extends MusicBeatState
 		descText.borderSize = 2.4;
 		add(descText);
 		changeSelection();
-
-		super.create();
 	}
 
+	var holdTime:Float = 0;
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (controls.UI_UP_P || FlxG.mouse.wheel > 0) {
 			changeSelection(-1);
+			holdTime = 0;
 		}
 		if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0) {
 			changeSelection(1);
+			holdTime = 0;
+		}
+		var down = controls.UI_DOWN;
+		var up = controls.UI_UP;
+		if (down || up)
+		{
+			var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
+			holdTime += elapsed;
+			var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+
+			if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
+			{
+				changeSelection((checkNewHold - checkLastHold) * (up ? -1 : 1));
+			}
 		}
 
 		if (controls.BACK) {
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			CoolUtil.playCancelSound();
 			MusicBeatState.switchState(new MainMenuState());
 		}
 	}
@@ -89,8 +103,8 @@ class AchievementsMenuState extends MusicBeatState
 	function changeSelection(change:Int = 0) {
 		curSelected += change;
 		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
+			curSelected = achievements.length - 1;
+		if (curSelected >= achievements.length)
 			curSelected = 0;
 
 		var bullShit:Int = 0;
@@ -111,8 +125,16 @@ class AchievementsMenuState extends MusicBeatState
 				achievementArray[i].alpha = 1;
 			}
 		}
-		descText.text = Achievements.achievementsStuff[achievementIndex[curSelected]][1];
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		descText.text = achievements[curSelected].description;
+		CoolUtil.playScrollSound();
 	}
 	#end
+
+	override public function destroy() {
+		achievements = null;
+		achievementArray = null;
+		grpOptions = FlxDestroyUtil.destroy(grpOptions);
+		descText = FlxDestroyUtil.destroy(descText);
+		super.destroy();
+	}
 }

@@ -1,0 +1,168 @@
+{
+	"animations": [
+		{
+			"enemyOffsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "shoot1",
+			"loop": false,
+			"name": "Pico shoot 1",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"enemyOffsets": [
+				-1,
+				-128
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "shoot2",
+			"loop": false,
+			"name": "Pico shoot 2",
+			"playerOffsets": [
+				-1,
+				-128
+			]
+		},
+		{
+			"enemyOffsets": [
+				412,
+				-64
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "shoot3",
+			"loop": false,
+			"name": "Pico shoot 3",
+			"playerOffsets": [
+				412,
+				-64
+			]
+		},
+		{
+			"enemyOffsets": [
+				439,
+				-19
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "shoot4",
+			"loop": false,
+			"name": "Pico shoot 4",
+			"playerOffsets": [
+				439,
+				-19
+			]
+		},
+		{
+			"enemyOffsets": [
+				412,
+				-64
+			],
+			"indices": [
+				50,
+				51,
+				52
+			],
+			"fps": 24,
+			"anim": "shoot3-loop",
+			"loop": true,
+			"name": "Pico shoot 3",
+			"playerOffsets": [
+				412,
+				-64
+			]
+		},
+		{
+			"enemyOffsets": [
+				0,
+				0
+			],
+			"indices": [
+				23,
+				24,
+				25
+			],
+			"fps": 24,
+			"anim": "shoot1-loop",
+			"loop": true,
+			"name": "Pico shoot 1",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"enemyOffsets": [
+				1,
+				-128
+			],
+			"indices": [
+				57,
+				58,
+				59
+			],
+			"fps": 24,
+			"anim": "shoot2-loop",
+			"loop": true,
+			"name": "Pico shoot 2",
+			"playerOffsets": [
+				1,
+				-128
+			]
+		},
+		{
+			"enemyOffsets": [
+				439,
+				-19
+			],
+			"indices": [
+				50,
+				51,
+				52
+			],
+			"fps": 24,
+			"anim": "shoot4-loop",
+			"loop": true,
+			"name": "Pico shoot 4",
+			"playerOffsets": [
+				439,
+				-19
+			]
+		}
+	],
+	"enemy_position": [
+		0,
+		-143
+	],
+	"repeatHoldAnimation": true,
+	"no_antialiasing": false,
+	"image": "characters/picoSpeaker",
+	"enemy_cameraPosition": [
+		-170,
+		100
+	],
+	"player_cameraPosition": [
+		310,
+		100
+	],
+	"healthicon": "pico",
+	"flip_x": false,
+	"healthbar_colors": [
+		183,
+		216,
+		85
+	],
+	"player_position": [
+		0,
+		-125
+	],
+	"sing_duration": 4,
+	"scale": 1
+}

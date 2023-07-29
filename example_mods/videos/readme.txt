@@ -1,3 +1,2 @@
-Put your custom videos here!
+Put your custom .mp4 videos here!
 They MUST be in 1280x720 resolution
-Supported file types: .mp4, .webm, .mov, .wmv, .avi, .flv

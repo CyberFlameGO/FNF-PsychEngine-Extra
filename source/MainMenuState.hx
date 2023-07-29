@@ -24,8 +24,8 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = '0.5.2h'; //This is also used for Discord RPC
-	public static var psychEngineExtraVersion:String = '0.1-git';
+	public static var psychEngineVersion:String = '0.6.2';
+	public static var psychEngineExtraVersion:String = '0.1'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
@@ -35,7 +35,7 @@ class MainMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'story_mode',
 		'freeplay',
-		#if MODS_ALLOWED 'mods', #end
+		'pvp',
 		#if ACHIEVEMENTS_ALLOWED 'awards', #end
 		'credits',
 		#if !switch 'donate', #end
@@ -47,9 +47,13 @@ class MainMenuState extends MusicBeatState
 	var camFollowPos:FlxObject;
 	var debugKeys:Array<FlxKey>;
 
+	public static var inPvP:Bool = false;
+
 	override function create()
-	{
-		WeekData.loadTheFirstEnabledMod();
+	{	
+		super.create();
+		
+		inPvP = false;
 		
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
@@ -63,9 +67,7 @@ class MainMenuState extends MusicBeatState
 		camAchievement.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-		FlxG.cameras.add(camAchievement);
-		FlxG.cameras.setDefaultDrawTarget(camAchievement, false);
+		FlxG.cameras.add(camAchievement, false);
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -138,36 +140,26 @@ class MainMenuState extends MusicBeatState
 		Achievements.loadAchievements();
 		var leDate = Date.now();
 		if (leDate.getDay() == 5 && leDate.getHours() >= 18) {
-			var achieveID:Int = Achievements.getAchievementIndex('friday_night_play');
-			if (!Achievements.isAchievementUnlocked(Achievements.achievementsStuff[achieveID][2])) { //It's a friday night. WEEEEEEEEEEEEEEEEEE
-				Achievements.achievementsMap.set(Achievements.achievementsStuff[achieveID][2], true);
+			if (!Achievements.isAchievementUnlocked('friday_night_play')) { //It's a friday night. WEEEEEEEEEEEEEEEEEE
+				Achievements.unlockAchievement('friday_night_play');
 				giveAchievement();
-				ClientPrefs.saveSettings();
 			}
 		}
 		#end
-
-		super.create();
 	}
 
 	#if ACHIEVEMENTS_ALLOWED
 	// Unlocks "Freaky on a Friday Night" achievement
 	function giveAchievement() {
 		add(new AchievementObject('friday_night_play', camAchievement));
-		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 		trace('Giving achievement "friday_night_play"');
 	}
 	#end
 
 	var selectedSomethin:Bool = false;
-
+	var holdTime:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (FlxG.sound.music.volume < 0.8)
-		{
-			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
-		}
-
 		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 
@@ -175,20 +167,37 @@ class MainMenuState extends MusicBeatState
 		{
 			if (controls.UI_UP_P || FlxG.mouse.wheel > 0)
 			{
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+				CoolUtil.playScrollSound();
 				changeItem(-1);
+				holdTime = 0;
 			}
 
 			if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0)
 			{
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+				CoolUtil.playScrollSound();
 				changeItem(1);
+				holdTime = 0;
+			}
+
+			var down = controls.UI_DOWN;
+			var up = controls.UI_UP;
+			if (down || up)
+			{
+				var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
+				holdTime += elapsed;
+				var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+
+				if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
+				{
+					CoolUtil.playScrollSound();
+					changeItem((checkNewHold - checkLastHold) * (up ? -1 : 1));
+				}
 			}
 
 			if (controls.BACK)
 			{
 				selectedSomethin = true;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				CoolUtil.playCancelSound();
 				MusicBeatState.switchState(new TitleState());
 			}
 
@@ -201,7 +210,7 @@ class MainMenuState extends MusicBeatState
 				else
 				{
 					selectedSomethin = true;
-					FlxG.sound.play(Paths.sound('confirmMenu'));
+					CoolUtil.playConfirmSound();
 
 					if (ClientPrefs.flashing) FlxFlicker.flicker(magenta, 1.1, 0.15, false);
 
@@ -225,20 +234,17 @@ class MainMenuState extends MusicBeatState
 
 								switch (daChoice)
 								{
-									case 'story_mode':
+									default:
 										MusicBeatState.switchState(new StoryMenuState());
 									case 'freeplay':
 										MusicBeatState.switchState(new FreeplayState());
-									#if MODS_ALLOWED
-									case 'mods':
-										MusicBeatState.switchState(new ModsMenuState());
-									#end
+									case 'pvp':
+										MusicBeatState.switchState(new pvp.PvPSongState());
 									case 'awards':
 										MusicBeatState.switchState(new AchievementsMenuState());
 									case 'credits':
 										MusicBeatState.switchState(new CreditsState());
 									case 'options':
-										PlayState.SONG = null;
 										LoadingState.loadAndSwitchState(new options.OptionsState());
 								}
 							});
@@ -246,7 +252,7 @@ class MainMenuState extends MusicBeatState
 					});
 				}
 			}
-			#if (desktop || debug)
+			#if desktop
 			else if (FlxG.keys.anyJustPressed(debugKeys))
 			{
 				selectedSomethin = true;

@@ -7,12 +7,12 @@ import flixel.input.keyboard.FlxKey;
 class ClientPrefs {
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
+	public static var opponentStrums:Bool = true;
 	public static var showFPS:Bool = true;
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
 	public static var noteSplashes:Bool = true;
-	public static var noteSplashesOpponent:Bool = false;
-	public static var stageQuality:String = 'Normal';
+	public static var gameQuality:String = 'Normal';
 	public static var framerate:Int = 60;
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
@@ -26,16 +26,20 @@ class ClientPrefs {
 	public static var healthBarAlpha:Float = 1;
 	public static var hitsoundVolume:Float = 0;
 	public static var pauseMusic:String = 'Tea Time';
-	public static var freeplayAlphabetic:Bool = false;
-	public static var instVolume:Float = 1;
-	public static var voicesVolume:Float = 1;
+	public static var checkForUpdates:Bool = true;
 	public static var underlayAlpha:Float = 0;
+	public static var underlayFull:Bool = false;
 	public static var instantRestart:Bool = false;
 	#if !html5
 	public static var autoPause:Bool = true;
 	#else
 	public static var autoPause:Bool = false;
 	#end
+	public static var focusLostPause:Bool = true;
+	public static var shitMisses:Bool = true;
+	public static var smoothHealth:Bool = true;
+	public static var keybindReminders:Bool = true;
+	public static var menuMusicVolume:Float = 1;
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -54,7 +58,8 @@ class ClientPrefs {
 		'instakill' => false,
 		'practice' => false,
 		'botplay' => false,
-		'opponentplay' => false
+		'opponentplay' => false,
+		'demomode' => false
 	];
 
 	public static var comboOffset:Array<Int> = [0, 0, 0, 0];
@@ -63,17 +68,19 @@ class ClientPrefs {
 	public static var goodWindow:Int = 90;
 	public static var badWindow:Int = 135;
 	public static var safeFrames:Float = 10;
+	public static var noteSkin:String = 'Default';
+	public static var uiSkin:String = 'Default';
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
 		//Key Bind, Name for ControlsSubState
-		'note1_0'		=> [S, SPACE],
+		'note1_0'		=> [SPACE, UP],
 
-		'note2_0'		=> [A, NONE],
+		'note2_0'		=> [A, LEFT],
 		'note2_1'		=> [D, RIGHT],
 
-		'note3_0'		=> [A, NONE],
-		'note3_1'		=> [S, NONE],
+		'note3_0'		=> [A, LEFT],
+		'note3_1'		=> [S, DOWN],
 		'note3_2'		=> [D, RIGHT],
 
 		'note4_0'		=> [A, LEFT],
@@ -170,6 +177,91 @@ class ClientPrefs {
 		'note13_10'		=> [I, NONE], 
 		'note13_11'		=> [O, NONE],
 		'note13_12'		=> [P, NONE],
+
+		'note14_0'		=> [Q, NONE],
+		'note14_1'		=> [W, NONE],
+		'note14_2'		=> [E, NONE],
+		'note14_3'		=> [R, NONE],
+		'note14_4' 		=> [S, NONE],
+		'note14_5' 		=> [D, NONE],
+		'note14_6'		=> [F, NONE],
+		'note14_7' 		=> [J, NONE],
+		'note14_8'		=> [K, NONE],
+		'note14_9'		=> [L, NONE],
+		'note14_10'		=> [U, NONE], 
+		'note14_11'		=> [I, NONE],
+		'note14_12'		=> [O, NONE],
+		'note14_13'		=> [P, NONE],
+
+		'note15_0'		=> [Q, NONE],
+		'note15_1'		=> [W, NONE],
+		'note15_2'		=> [E, NONE],
+		'note15_3'		=> [R, NONE],
+		'note15_4' 		=> [S, NONE],
+		'note15_5' 		=> [D, NONE],
+		'note15_6'		=> [F, NONE],
+		'note15_7' 		=> [SPACE, NONE],
+		'note15_8'		=> [J, NONE],
+		'note15_9'		=> [K, NONE],
+		'note15_10'		=> [L, NONE], 
+		'note15_11'		=> [U, NONE],
+		'note15_12'		=> [I, NONE],
+		'note15_13'		=> [O, NONE],
+		'note15_14'		=> [P, NONE],
+
+		'note16_0'		=> [Q, NONE],
+		'note16_1'		=> [W, NONE],
+		'note16_2'		=> [E, NONE],
+		'note16_3'		=> [R, NONE],
+		'note16_4' 		=> [A, NONE],
+		'note16_5' 		=> [S, NONE],
+		'note16_6'		=> [D, NONE],
+		'note16_7' 		=> [F, NONE],
+		'note16_8'		=> [H, NONE],
+		'note16_9'		=> [J, NONE],
+		'note16_10'		=> [K, NONE], 
+		'note16_11'		=> [L, NONE],
+		'note16_12'		=> [U, NONE],
+		'note16_13'		=> [I, NONE],
+		'note16_14'		=> [O, NONE],
+		'note16_15'		=> [P, NONE],
+
+		'note17_0'		=> [Q, NONE],
+		'note17_1'		=> [W, NONE],
+		'note17_2'		=> [E, NONE],
+		'note17_3'		=> [R, NONE],
+		'note17_4' 		=> [A, NONE],
+		'note17_5' 		=> [S, NONE],
+		'note17_6'		=> [D, NONE],
+		'note17_7' 		=> [F, NONE],
+		'note17_8'		=> [SPACE, NONE],
+		'note17_9'		=> [H, NONE],
+		'note17_10'		=> [J, NONE], 
+		'note17_11'		=> [K, NONE],
+		'note17_12'		=> [L, NONE],
+		'note17_13'		=> [U, NONE],
+		'note17_14'		=> [I, NONE],
+		'note17_15'		=> [O, NONE],
+		'note17_16'		=> [P, NONE],
+
+		'note18_0'		=> [Q, NONE],
+		'note18_1'		=> [W, NONE],
+		'note18_2'		=> [E, NONE],
+		'note18_3'		=> [R, NONE],
+		'note18_4' 		=> [A, NONE],
+		'note18_5' 		=> [S, NONE],
+		'note18_6'		=> [D, NONE],
+		'note18_7' 		=> [F, NONE],
+		'note18_8'		=> [V, NONE],
+		'note18_9'		=> [N, NONE],
+		'note18_10'		=> [H, NONE], 
+		'note18_11'		=> [J, NONE],
+		'note18_12'		=> [K, NONE],
+		'note18_13'		=> [L, NONE],
+		'note18_14'		=> [U, NONE],
+		'note18_15'		=> [I, NONE],
+		'note18_16'		=> [O, NONE],
+		'note18_17'		=> [P, NONE],
 		
 		'ui_left'		=> [A, LEFT],
 		'ui_down'		=> [S, DOWN],
@@ -190,7 +282,7 @@ class ClientPrefs {
 	];
 	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
 
-	public static function loadDefaultKeys() {
+	public static function setupDefaults() {
 		defaultKeys = keyBinds.copy();
 
 		for (i in 0...Note.MAX_KEYS) {
@@ -204,12 +296,12 @@ class ClientPrefs {
 	public static function saveSettings() {
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
+		FlxG.save.data.opponentStrums = opponentStrums;
 		FlxG.save.data.showFPS = showFPS;
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
-		FlxG.save.data.noteSplashesOpponent = noteSplashesOpponent;
-		FlxG.save.data.stageQuality = stageQuality;
+		FlxG.save.data.gameQuality = gameQuality;
 		FlxG.save.data.framerate = framerate;
 		FlxG.save.data.camZooms = camZooms;
 		FlxG.save.data.noteOffset = noteOffset;
@@ -222,12 +314,15 @@ class ClientPrefs {
 		FlxG.save.data.noReset = noReset;
 		FlxG.save.data.healthBarAlpha = healthBarAlpha;
 		FlxG.save.data.comboOffset = comboOffset;
-		FlxG.save.data.freeplayAlphabetic = freeplayAlphabetic;
-		FlxG.save.data.instVolume = instVolume;
-		FlxG.save.data.voicesVolume = voicesVolume;
 		FlxG.save.data.underlayAlpha = underlayAlpha;
+		FlxG.save.data.underlayFull = underlayFull;
 		FlxG.save.data.instantRestart = instantRestart;
 		FlxG.save.data.autoPause = autoPause;
+		FlxG.save.data.focusLostPause = focusLostPause;
+		FlxG.save.data.shitMisses = shitMisses;
+		FlxG.save.data.smoothHealth = smoothHealth;
+		FlxG.save.data.keybindReminders = keybindReminders;
+		FlxG.save.data.menuMusicVolume = menuMusicVolume;
 		FlxG.save.data.achievementsMap = Achievements.achievementsMap;
 		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
 
@@ -238,6 +333,7 @@ class ClientPrefs {
 		FlxG.save.data.safeFrames = safeFrames;
 		FlxG.save.data.hitsoundVolume = hitsoundVolume;
 		FlxG.save.data.pauseMusic = pauseMusic;
+		FlxG.save.data.checkForUpdates = checkForUpdates;
 		FlxG.save.data.gameplaySettings = gameplaySettings;
 	
 		FlxG.save.flush();
@@ -256,6 +352,9 @@ class ClientPrefs {
 		if (FlxG.save.data.middleScroll != null) {
 			middleScroll = FlxG.save.data.middleScroll;
 		}
+		if(FlxG.save.data.opponentStrums != null) {
+			opponentStrums = FlxG.save.data.opponentStrums;
+		}
 		if (FlxG.save.data.showFPS != null) {
 			showFPS = FlxG.save.data.showFPS;
 			if (Main.fpsVar != null) {
@@ -271,13 +370,10 @@ class ClientPrefs {
 		if (FlxG.save.data.noteSplashes != null) {
 			noteSplashes = FlxG.save.data.noteSplashes;
 		}
-		if (FlxG.save.data.noteSplashesOpponent != null) {
-			noteSplashesOpponent = FlxG.save.data.noteSplashesOpponent;
-		}
-		if (FlxG.save.data.stageQuality != null) {
-			stageQuality = FlxG.save.data.stageQuality;
+		if (FlxG.save.data.gameQuality != null) {
+			gameQuality = FlxG.save.data.gameQuality;
 		} else if (FlxG.save.data.lowQuality != null) {
-			stageQuality = (FlxG.save.data.lowQuality ? 'Low' : 'Normal');
+			gameQuality = (FlxG.save.data.lowQuality ? 'Low' : 'Normal');
 		}
 		if (FlxG.save.data.framerate != null) {
 			framerate = FlxG.save.data.framerate;
@@ -344,26 +440,15 @@ class ClientPrefs {
 		if(FlxG.save.data.pauseMusic != null) {
 			pauseMusic = FlxG.save.data.pauseMusic;
 		}
-		if (FlxG.save.data.gameplaySettings != null)
+		if (FlxG.save.data.checkForUpdates != null)
 		{
-			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
-			for (name => value in savedMap)
-			{
-				gameplaySettings.set(name, value);
-			}
-		}
-
-		if (FlxG.save.data.freeplayAlphabetic != null) {
-			freeplayAlphabetic = FlxG.save.data.freeplayAlphabetic;
-		}
-		if (FlxG.save.data.instVolume != null) {
-			instVolume = FlxG.save.data.instVolume;
-		}
-		if (FlxG.save.data.voicesVolume != null) {
-			voicesVolume = FlxG.save.data.voicesVolume;
-		}
+			checkForUpdates = FlxG.save.data.checkForUpdates;
+		}	
 		if (FlxG.save.data.underlayAlpha != null) {
 			underlayAlpha = FlxG.save.data.underlayAlpha;
+		}
+		if (FlxG.save.data.underlayFull != null) {
+			underlayFull = FlxG.save.data.underlayFull;
 		}
 		if (FlxG.save.data.instantRestart != null) {
 			instantRestart = FlxG.save.data.instantRestart;
@@ -372,27 +457,42 @@ class ClientPrefs {
 			autoPause = FlxG.save.data.autoPause;
 			FlxG.autoPause = autoPause;
 		}
+		if (FlxG.save.data.focusLostPause != null) {
+			focusLostPause = FlxG.save.data.focusLostPause;
+		}
+		if (FlxG.save.data.shitMisses != null) {
+			shitMisses = FlxG.save.data.shitMisses;
+		}
+		if (FlxG.save.data.smoothHealth != null) {
+			smoothHealth = FlxG.save.data.smoothHealth;
+		}
+		if (FlxG.save.data.keybindReminders != null) {
+			keybindReminders = FlxG.save.data.keybindReminders;
+		}
+		if (FlxG.save.data.menuMusicVolume != null) {
+			menuMusicVolume = FlxG.save.data.menuMusicVolume;
+		}
+		if (FlxG.save.data.gameplaySettings != null)
+		{
+			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
+			for (name => value in savedMap)
+			{
+				gameplaySettings.set(name, value);
+			}
+		}
 		
 		// flixel automatically saves your volume!
-		if (FlxG.save.data.volume != null)
-		{
-			FlxG.sound.volume = FlxG.save.data.volume;
-		}
-		if (FlxG.save.data.mute != null)
-		{
-			FlxG.sound.muted = FlxG.save.data.mute;
-		}
+		@:privateAccess
+		FlxG.sound.loadSavedPrefs();
 
 		var save = new FlxSave();
 		save.bind('controls_v2', 'extra');
 		if (save != null && save.data.customControls != null) {
 			var loadedControls:Map<String, Array<FlxKey>> = save.data.customControls;
-			if (loadedControls.get('note_left') == null) { //prevent having old controls
-				for (control => keys in loadedControls) {
-					keyBinds.set(control, keys);
-				}
-				reloadControls();
+			for (control => keys in loadedControls) {
+				keyBinds.set(control, keys);
 			}
+			reloadControls();
 		}
 	}
 

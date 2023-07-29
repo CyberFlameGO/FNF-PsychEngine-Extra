@@ -13,7 +13,7 @@ using StringTools;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Save Data'];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -26,12 +26,10 @@ class OptionsState extends MusicBeatState
 			OptionsState.goToPlayState = goToPlayState;
 	}
 
-	function openSelectedSubstate(label:String) {
+	function openSelectedSubState(label:String) {
 		switch(label) {
 			case 'Note Colors':
-				FlxTransitionableState.skipNextTransIn = true;
-				FlxTransitionableState.skipNextTransOut = true;
-				MusicBeatState.switchState(new options.NotesChooseState());
+				openSubState(new options.NotesSubState.NotesChooseSubState());
 			case 'Controls':
 				openSubState(new options.ControlsSubState());
 			case 'Graphics':
@@ -42,6 +40,8 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+			case 'Save Data':
+				openSubState(new options.SaveDataSubState());
 		}
 	}
 
@@ -49,9 +49,19 @@ class OptionsState extends MusicBeatState
 	var selectorRight:Alphabet;
 
 	override function create() {
+		super.create();
+		
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
+
+		if (MainMenuState.inPvP) {
+			var gamepad = FlxG.gamepads.getByID(0);
+			if (gamepad != null)
+				controls.addDefaultGamepad(0);
+		}
+
+		FlxG.mouse.visible = true;
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFea71fd;
@@ -77,8 +87,6 @@ class OptionsState extends MusicBeatState
 
 		changeSelection();
 		ClientPrefs.saveSettings();
-
-		super.create();
 	}
 
 	override function closeSubState() {
@@ -94,29 +102,50 @@ class OptionsState extends MusicBeatState
 		}
 	}
 
+	var holdTime:Float = 0;
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (controls.UI_UP_P || FlxG.mouse.wheel > 0) {
 			changeSelection(-1);
+			holdTime = 0;
 		}
 		if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0) {
 			changeSelection(1);
+			holdTime = 0;
+		}
+		var down = controls.UI_DOWN;
+		var up = controls.UI_UP;
+		if (down || up)
+		{
+			var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
+			holdTime += elapsed;
+			var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+
+			if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
+			{
+				changeSelection((checkNewHold - checkLastHold) * (up ? -1 : 1));
+			}
 		}
 
 		if (controls.BACK) {
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxG.mouse.visible = false;
+			CoolUtil.playCancelSound();
 			if (goToPlayState) {
 				StageData.loadDirectory(PlayState.SONG);
 				goToPlayState = false;
-				LoadingState.loadAndSwitchState(new PlayState(), true);
+				if (MainMenuState.inPvP) {
+					controls.removeGamepad(0);
+					LoadingState.loadAndSwitchState(new pvp.PvPPlayState(), true);
+				} else
+					LoadingState.loadAndSwitchState(new PlayState(), true);
 			} else {
 				MusicBeatState.switchState(new MainMenuState());
 			}
 		}
 
 		if (controls.ACCEPT || FlxG.mouse.justPressed) {
-			openSelectedSubstate(options[curSelected]);
+			openSelectedSubState(options[curSelected]);
 		}
 	}
 	
@@ -142,6 +171,6 @@ class OptionsState extends MusicBeatState
 				selectorRight.y = item.y;
 			}
 		}
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		CoolUtil.playScrollSound();
 	}
 }

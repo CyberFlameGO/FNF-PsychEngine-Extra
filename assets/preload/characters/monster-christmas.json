@@ -1,62 +1,82 @@
 {
 	"animations": [
 		{
-			"offsets": [
+			"enemyOffsets": [
 				1,
 				0
 			],
-			"loop": false,
+			"indices": [],
 			"fps": 24,
 			"anim": "idle",
-			"indices": [],
-			"name": "monster idle"
+			"loop": false,
+			"name": "monster idle",
+			"playerOffsets": [
+				1,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-20,
 				50
 			],
-			"loop": false,
+			"indices": [],
 			"fps": 24,
 			"anim": "singUP",
-			"indices": [],
-			"name": "monster up note"
+			"loop": false,
+			"name": "monster up note",
+			"playerOffsets": [
+				-40,
+				50
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				0
 			],
-			"loop": false,
+			"indices": [],
 			"fps": 24,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "Monster left note"
+			"loop": false,
+			"name": "Monster left note",
+			"playerOffsets": [
+				30,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-51,
 				0
 			],
-			"loop": false,
+			"indices": [],
 			"fps": 24,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "Monster Right note"
+			"loop": false,
+			"name": "Monster Right note",
+			"playerOffsets": [
+				-51,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-40,
 				-94
 			],
-			"loop": false,
+			"indices": [],
 			"fps": 24,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "monster down"
+			"loop": false,
+			"name": "monster down",
+			"playerOffsets": [
+				0,
+				-94
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-20,
 				50
 			],
@@ -68,10 +88,14 @@
 			"fps": 24,
 			"anim": "singUP-loop",
 			"loop": true,
-			"name": "monster up note"
+			"name": "monster up note",
+			"playerOffsets": [
+				-40,
+				50
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-40,
 				-94
 			],
@@ -83,10 +107,14 @@
 			"fps": 24,
 			"anim": "singDOWN-loop",
 			"loop": true,
-			"name": "monster down"
+			"name": "monster down",
+			"playerOffsets": [
+				0,
+				-94
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-51,
 				0
 			],
@@ -98,10 +126,14 @@
 			"fps": 24,
 			"anim": "singRIGHT-loop",
 			"loop": true,
-			"name": "Monster Right note"
+			"name": "Monster Right note",
+			"playerOffsets": [
+				-51,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				0
 			],
@@ -113,10 +145,14 @@
 			"fps": 24,
 			"anim": "singLEFT-loop",
 			"loop": true,
-			"name": "Monster left note"
+			"name": "Monster left note",
+			"playerOffsets": [
+				30,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				1,
 				0
 			],
@@ -128,14 +164,27 @@
 			"fps": 24,
 			"anim": "idle-loop",
 			"loop": true,
-			"name": "monster idle"
+			"name": "monster idle",
+			"playerOffsets": [
+				1,
+				0
+			]
 		}
 	],
+	"enemy_position": [
+		-110,
+		70
+	],
+	"repeatHoldAnimation": true,
 	"no_antialiasing": false,
 	"image": "characters/monsterChristmas",
-	"position": [
+	"enemy_cameraPosition": [
 		0,
-		130
+		50
+	],
+	"player_cameraPosition": [
+		0,
+		50
 	],
 	"healthicon": "monster",
 	"flip_x": false,
@@ -144,9 +193,9 @@
 		255,
 		110
 	],
-	"camera_position": [
-		0,
-		0
+	"player_position": [
+		50,
+		70
 	],
 	"sing_duration": 4,
 	"scale": 1

@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxDestroyUtil;
 import flixel.FlxG;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -8,7 +9,7 @@ import flixel.util.FlxGradient;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 
-class CustomFadeTransition extends MusicBeatSubstate {
+class CustomFadeTransition extends MusicBeatSubState {
 	public static var finishCallback:Void->Void;
 	private var leTween:FlxTween = null;
 	public static var nextCamera:FlxCamera;
@@ -46,9 +47,9 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			transBlack.y = transGradient.y - transBlack.height + 50;
 			leTween = FlxTween.tween(transGradient, {y: transGradient.height + 50}, duration, {
 				onComplete: function(twn:FlxTween) {
-					if (finishCallback != null) {
+					if (finishCallback != null)
 						finishCallback();
-					}
+					leTween = null;
 				},
 			ease: FlxEase.linear});
 		}
@@ -75,10 +76,15 @@ class CustomFadeTransition extends MusicBeatSubstate {
 	}
 
 	override function destroy() {
-		if (leTween != null) {
-			finishCallback();
-			leTween.cancel();
-		}
 		super.destroy();
+		if (leTween != null) {
+			if (finishCallback != null)
+				finishCallback();
+			leTween.cancel();
+			leTween.destroy();
+		}
+		leTween = null;
+		transBlack = FlxDestroyUtil.destroy(transBlack);
+		transGradient = FlxDestroyUtil.destroy(transGradient);
 	}
 }

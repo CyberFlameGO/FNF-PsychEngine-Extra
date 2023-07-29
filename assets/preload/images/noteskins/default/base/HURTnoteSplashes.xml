@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="HURTnoteSplashes.png">
+	<!-- Created with Adobe Animate version 19.0.0.326 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="note splash 10000" x="0" y="490" width="273" height="199" frameX="-22" frameY="-23" frameWidth="349" frameHeight="255"/>
+	<SubTexture name="note splash 10001" x="0" y="690" width="240" height="199" frameX="-29" frameY="-13" frameWidth="349" frameHeight="255"/>
+	<SubTexture name="note splash 10002" x="0" y="256" width="327" height="233" frameX="-3" frameY="-6" frameWidth="349" frameHeight="255"/>
+	<SubTexture name="note splash 10003" x="0" y="0" width="349" height="255"/>
+	<SubTexture name="note splash 20000" x="0" y="490" width="273" height="199" frameX="-22" frameY="-23" frameWidth="349" frameHeight="255"/>
+	<SubTexture name="note splash 20001" x="0" y="690" width="240" height="199" frameX="-29" frameY="-13" frameWidth="349" frameHeight="255"/>
+	<SubTexture name="note splash 20002" x="0" y="256" width="327" height="233" frameX="-3" frameY="-6" frameWidth="349" frameHeight="255"/>
+	<SubTexture name="note splash 20003" x="0" y="0" width="349" height="255"/>
+</TextureAtlas>

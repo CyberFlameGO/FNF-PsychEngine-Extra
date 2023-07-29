@@ -1,106 +1,142 @@
 {
 	"animations": [
 		{
-			"offsets": [
+			"enemyOffsets": [
 				2,
 				0
 			],
-			"loop": false,
-			"anim": "idle",
+			"indices": [],
 			"fps": 24,
+			"anim": "idle",
+			"loop": false,
 			"name": "Parent Christmas Idle",
-			"indices": []
+			"playerOffsets": [
+				2,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-47,
 				24
 			],
-			"loop": false,
-			"anim": "singUP",
+			"indices": [],
 			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
 			"name": "Parent Up Note Dad",
-			"indices": []
+			"playerOffsets": [
+				-41,
+				24
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-31,
 				-29
 			],
-			"loop": false,
-			"anim": "singDOWN",
+			"indices": [],
 			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
 			"name": "Parent Down Note Dad",
-			"indices": []
+			"playerOffsets": [
+				5,
+				-29
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				16
 			],
-			"loop": false,
-			"anim": "singLEFT",
+			"indices": [],
 			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
 			"name": "Parent Left Note Dad",
-			"indices": []
+			"playerOffsets": [
+				-58,
+				16
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-1,
 				-23
 			],
-			"loop": false,
-			"anim": "singRIGHT",
+			"indices": [],
 			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
 			"name": "Parent Right Note Dad",
-			"indices": []
+			"playerOffsets": [
+				78,
+				-23
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-1,
 				-24
 			],
-			"loop": false,
-			"anim": "singRIGHT-alt",
+			"indices": [],
 			"fps": 24,
+			"anim": "singRIGHT-alt",
+			"loop": false,
 			"name": "Parent Right Note Mom",
-			"indices": []
+			"playerOffsets": [
+				78,
+				-24
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				-27
 			],
-			"loop": false,
-			"anim": "singDOWN-alt",
+			"indices": [],
 			"fps": 24,
+			"anim": "singDOWN-alt",
+			"loop": false,
 			"name": "Parent Down Note Mom",
-			"indices": []
+			"playerOffsets": [
+				5,
+				-27
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				15
 			],
-			"loop": false,
-			"anim": "singLEFT-alt",
+			"indices": [],
 			"fps": 24,
+			"anim": "singLEFT-alt",
+			"loop": false,
 			"name": "Parent Left Note Mom",
-			"indices": []
+			"playerOffsets": [
+				-58,
+				15
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-47,
 				24
 			],
-			"loop": false,
-			"anim": "singUP-alt",
+			"indices": [],
 			"fps": 24,
+			"anim": "singUP-alt",
+			"loop": false,
 			"name": "Parent Up Note Mom",
-			"indices": []
+			"playerOffsets": [
+				-41,
+				24
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				2,
 				0
 			],
@@ -113,10 +149,14 @@
 			"fps": 24,
 			"anim": "idle-loop",
 			"loop": true,
-			"name": "Parent Christmas Idle"
+			"name": "Parent Christmas Idle",
+			"playerOffsets": [
+				2,
+				0
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-47,
 				24
 			],
@@ -129,10 +169,14 @@
 			"fps": 24,
 			"anim": "singUP-loop",
 			"loop": true,
-			"name": "Parent Up Note Dad"
+			"name": "Parent Up Note Dad",
+			"playerOffsets": [
+				-41,
+				24
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				16
 			],
@@ -145,10 +189,14 @@
 			"fps": 24,
 			"anim": "singLEFT-loop",
 			"loop": true,
-			"name": "Parent Left Note Dad"
+			"name": "Parent Left Note Dad",
+			"playerOffsets": [
+				-58,
+				16
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-31,
 				-29
 			],
@@ -161,10 +209,14 @@
 			"fps": 24,
 			"anim": "singDOWN-loop",
 			"loop": true,
-			"name": "Parent Down Note Dad"
+			"name": "Parent Down Note Dad",
+			"playerOffsets": [
+				5,
+				-29
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-1,
 				-23
 			],
@@ -177,10 +229,14 @@
 			"fps": 24,
 			"anim": "singRIGHT-loop",
 			"loop": true,
-			"name": "Parent Right Note Dad"
+			"name": "Parent Right Note Dad",
+			"playerOffsets": [
+				78,
+				-23
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-1,
 				-24
 			],
@@ -193,10 +249,14 @@
 			"fps": 24,
 			"anim": "singRIGHT-alt-loop",
 			"loop": true,
-			"name": "Parent Right Note Mom"
+			"name": "Parent Right Note Mom",
+			"playerOffsets": [
+				78,
+				-24
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-47,
 				24
 			],
@@ -209,10 +269,14 @@
 			"fps": 24,
 			"anim": "singUP-alt-loop",
 			"loop": true,
-			"name": "Parent Up Note Mom"
+			"name": "Parent Up Note Mom",
+			"playerOffsets": [
+				-41,
+				24
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				15
 			],
@@ -225,10 +289,14 @@
 			"fps": 24,
 			"anim": "singLEFT-alt-loop",
 			"loop": true,
-			"name": "Parent Left Note Mom"
+			"name": "Parent Left Note Mom",
+			"playerOffsets": [
+				-58,
+				15
+			]
 		},
 		{
-			"offsets": [
+			"enemyOffsets": [
 				-30,
 				-27
 			],
@@ -241,14 +309,27 @@
 			"fps": 24,
 			"anim": "singDOWN-alt-loop",
 			"loop": true,
-			"name": "Parent Down Note Mom"
+			"name": "Parent Down Note Mom",
+			"playerOffsets": [
+				5,
+				-27
+			]
 		}
 	],
+	"enemy_position": [
+		-250,
+		0
+	],
+	"repeatHoldAnimation": true,
 	"no_antialiasing": false,
 	"image": "characters/mom_dad_christmas_assets",
-	"position": [
-		-500,
-		0
+	"enemy_cameraPosition": [
+		120,
+		40
+	],
+	"player_cameraPosition": [
+		-120,
+		40
 	],
 	"healthicon": "parents",
 	"flip_x": false,
@@ -257,8 +338,8 @@
 		94,
 		174
 	],
-	"camera_position": [
-		0,
+	"player_position": [
+		-220,
 		0
 	],
 	"sing_duration": 4,

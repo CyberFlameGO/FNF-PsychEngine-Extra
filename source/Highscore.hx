@@ -94,10 +94,9 @@ class Highscore
 		FlxG.save.flush();
 	}
 
-	public static function formatSong(song:String, diff:Int, useCurrentMod:Bool = true):String
+	public static function formatSong(song:String, diff:Int):String
 	{
-		var daSong = Paths.formatToSongPath(song) + CoolUtil.getDifficultyFilePath(diff);
-		return (useCurrentMod ? WeekData.formatWeek(daSong) : daSong);
+		return Paths.formatToSongPath(song) + CoolUtil.getDifficultyFilePath(diff);
 	}
 
 	public static function getScore(song:String, diff:Int):Int
@@ -144,7 +143,6 @@ class Highscore
 	}
 
 	public static function completedWeek(week:String) {
-		if (!week.contains(':')) week = WeekData.formatWeek(week);
 		return (StoryMenuState.weekCompleted.exists(week) && StoryMenuState.weekCompleted.get(week));
 	}
 }

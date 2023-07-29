@@ -41,6 +41,9 @@ class NoteOffsetState extends MusicBeatState
 
 	override public function create()
 	{
+		CustomFadeTransition.nextCamera = camOther;
+		super.create();
+		
 		// Cameras
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -49,13 +52,9 @@ class NoteOffsetState extends MusicBeatState
 		camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-		FlxG.cameras.add(camHUD);
-		FlxG.cameras.setDefaultDrawTarget(camHUD, false);
-		FlxG.cameras.add(camOther);
-		FlxG.cameras.setDefaultDrawTarget(camOther, false);
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
 
-		CustomFadeTransition.nextCamera = camOther;
 		FlxG.camera.scroll.set(120, 130);
 
 		persistentUpdate = true;
@@ -69,7 +68,7 @@ class NoteOffsetState extends MusicBeatState
 		stageFront.updateHitbox();
 		add(stageFront);
 
-		if (ClientPrefs.stageQuality == 'Normal') {
+		if (ClientPrefs.gameQuality == 'Normal') {
 			var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
@@ -103,7 +102,7 @@ class NoteOffsetState extends MusicBeatState
 		coolText.screenCenter();
 		coolText.x = FlxG.width * 0.35;
 
-		rating = new FlxSprite().loadGraphic(Paths.image('uiskins/default/sick'));
+		rating = new FlxSprite().loadGraphic(Paths.image('uiskins/default/base/sick'));
 		rating.cameras = [camHUD];
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
 		rating.updateHitbox();
@@ -124,7 +123,7 @@ class NoteOffsetState extends MusicBeatState
 		var daLoop:Int = 0;
 		for (i in seperatedScore)
 		{
-			var numScore:FlxSprite = new FlxSprite(43 * daLoop).loadGraphic(Paths.image('uiskins/default/num$i'));
+			var numScore:FlxSprite = new FlxSprite(43 * daLoop).loadGraphic(Paths.image('uiskins/default/base/num$i'));
 			numScore.cameras = [camHUD];
 			numScore.setGraphicSize(Std.int(numScore.width * 0.5));
 			numScore.updateHitbox();
@@ -159,7 +158,7 @@ class NoteOffsetState extends MusicBeatState
 		barPercent = ClientPrefs.noteOffset;
 		updateNoteDelay();
 		
-		timeBarBG = new FlxSprite(0, timeTxt.y + 8).loadGraphic(Paths.image('uiskins/default/timeBar'));
+		timeBarBG = new FlxSprite(0, timeTxt.y + 8).loadGraphic(Paths.image('uiskins/default/base/timeBar'));
 		timeBarBG.setGraphicSize(Std.int(timeBarBG.width * 1.2));
 		timeBarBG.updateHitbox();
 		timeBarBG.cameras = [camHUD];
@@ -193,10 +192,8 @@ class NoteOffsetState extends MusicBeatState
 		add(changeModeText);
 		updateMode();
 
-		Conductor.changeBPM(128.0);
+		Conductor.changeBPM(128);
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
-
-		super.create();
 	}
 
 	var holdTime:Float = 0;
@@ -350,7 +347,7 @@ class NoteOffsetState extends MusicBeatState
 			persistentUpdate = false;
 			CustomFadeTransition.nextCamera = camOther;
 			MusicBeatState.switchState(new options.OptionsState());
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
+			CoolUtil.playMenuMusic();
 			FlxG.mouse.visible = false;
 		}
 

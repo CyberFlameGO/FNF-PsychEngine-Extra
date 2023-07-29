@@ -1,13 +1,11 @@
 package;
 
+import flixel.math.FlxMath;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
-import openfl.utils.Assets;
-#if MODS_ALLOWED
-import sys.io.File;
-import sys.FileSystem;
-#end
+import lime.app.Application;
+import lime.graphics.Image;
 
 using StringTools;
 
@@ -22,18 +20,29 @@ class CoolUtil
 
 	public static var difficulties:Array<String> = [];
 
-	public static function getDifficultyFilePath(num:Null<Int> = null)
+	inline public static function quantize(f:Float, snap:Float){
+		// changed so this actually works lol
+		var m:Float = Math.fround(f * snap);
+		return (m / snap);
+	}
+
+	public static function getDifficultyFilePath(?num:Int = null)
 	{
 		if (num == null) num = PlayState.storyDifficulty;
+		if (num >= difficulties.length) num = difficulties.length - 1;
 
 		var fileSuffix:String = difficulties[num];
-		if (fileSuffix != defaultDifficulty)
-		{
-			fileSuffix = '-$fileSuffix';
-		}
-		else
-		{
+		if (fileSuffix == null) {
 			fileSuffix = '';
+		} else {
+			if (fileSuffix != defaultDifficulty)
+			{
+				fileSuffix = '-$fileSuffix';
+			}
+			else
+			{
+				fileSuffix = '';
+			}
 		}
 		return Paths.formatToSongPath(fileSuffix);
 	}
@@ -47,14 +56,11 @@ class CoolUtil
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static function coolTextFile(path:String):Array<String>
+	public static function coolTextFile(path:String)
 	{
 		var daList:Array<String> = [];
-		#if MODS_ALLOWED
-		if (Assets.exists(path) || FileSystem.exists(path)) daList = File.getContent(path).trim().split('\n');
-		#else
-		if (Assets.exists(path)) daList = Assets.getText(path).trim().split('\n');
-		#end
+		if (Paths.exists(path, TEXT))
+			daList = Paths.getContent(path).trim().split('\n');
 
 		for (i in 0...daList.length)
 		{
@@ -63,18 +69,26 @@ class CoolUtil
 
 		return daList;
 	}
-	public static function listFromString(string:String):Array<String>
+
+	public static function coolArrayTextFile(path:String)
 	{
 		var daList:Array<String> = [];
-		daList = string.trim().split('\n');
+		var daArray:Array<Array<String>> = [];
+		if (Paths.exists(path, TEXT))
+			daList = Paths.getContent(path).trim().split('\n');
 
 		for (i in 0...daList.length)
 		{
 			daList[i] = daList[i].trim();
 		}
 
-		return daList;
+		for (i in daList) {
+			daArray.push(i.split(' '));
+		}
+
+		return daArray;
 	}
+	
 	public static function dominantColor(sprite:FlxSprite):Int {
 		var countByColor:Map<Int, Int> = [];
 		for (col in 0...sprite.frameWidth) {
@@ -105,19 +119,8 @@ class CoolUtil
 	{
 		var dumbArray:Array<Int> = [];
 		for (i in min...max)
-		{
 			dumbArray.push(i);
-		}
 		return dumbArray;
-	}
-
-	//uhhhh does this even work at all? i'm starting to doubt
-	public static function precacheSound(sound:String, ?library:String = null):Void {
-		Paths.returnSound('sounds', sound, library);
-	}
-
-	public static function precacheMusic(sound:String, ?library:String = null):Void {
-		Paths.returnSound('music', sound, library);
 	}
 
 	public static function browserLoad(site:String) {
@@ -132,21 +135,9 @@ class CoolUtil
 		song = Paths.formatToSongPath(song);
 		difficulties = defaultDifficulties.copy();
 		var diffStr:String = WeekData.getCurrentWeek().difficulties;
-		if ((diffStr == null || diffStr.length == 0) && song.length > 0) {
-			var num:Int = 0;
-			for (i in WeekData.weeksLoaded.keys()) {
-				var songs:Array<Dynamic> = WeekData.weeksLoaded.get(i).songs;
-				for (daSong in songs) {
-					var name:String = daSong[0];
-					name = name.toLowerCase().trim();
-					if (name == song) {
-						PlayState.storyWeek = num;
-						diffStr = WeekData.getCurrentWeek().difficulties;
-						break;
-					}
-				}
-				num++;
-			}
+		if (!PlayState.isStoryMode) {
+			var meta = Song.getMetaFile(song);
+			if (meta.freeplayDifficulties != null && meta.freeplayDifficulties.length > 0) diffStr = meta.freeplayDifficulties;
 		}
 		if (diffStr == null || diffStr.length == 0) diffStr = 'Easy,Normal,Hard';
 		diffStr = diffStr.trim(); //Fuck you HTML5
@@ -171,6 +162,7 @@ class CoolUtil
 				{
 					diffs.remove(diffs[i]);
 				}
+				len = diffs.length;
 			}
 			
 			if (remove && song.length > 0) {
@@ -179,11 +171,11 @@ class CoolUtil
 				while (i < len) {
 					if (diffs[i] != null) {
 						var suffix = '-${Paths.formatToSongPath(diffs[i])}';
-						if (Paths.formatToSongPath(diffs[i]) == defaultDifficulty.toLowerCase()) {
+						if (diffs[i] == defaultDifficulty) {
 							suffix = '';
 						}
 						var poop:String = song + suffix;
-						if (!Paths.fileExists('data/$song/$poop.json', TEXT)) {
+						if (!Paths.existsPath('data/$song/$poop.json', TEXT)) {
 							diffs.remove(diffs[i]);
 						} else {
 							i++;
@@ -191,6 +183,7 @@ class CoolUtil
 					} else {
 						diffs.remove(diffs[i]);
 					}
+					len = diffs.length;
 				}
 			}
 
@@ -199,5 +192,70 @@ class CoolUtil
 				difficulties = diffs;
 			}
 		}
+	}
+
+	public static function setWindowIcon(image:String = 'iconOG') {
+		Image.loadFromFile(Paths.getPath('images/$image.png', IMAGE)).onComplete(function (img) {
+			Application.current.window.setIcon(img);
+		});
+	}
+
+	public static function playMenuMusic(volume:Float = 1) {
+		FlxG.sound.playMusic(Paths.music('freakyMenu'), volume * ClientPrefs.menuMusicVolume);
+	}
+
+	public static function playScrollSound(volume:Float = 0.4) {
+		FlxG.sound.play(Paths.sound('scrollMenu'), volume);
+	}
+
+	public static function playConfirmSound(volume:Float = 0.7) {
+		FlxG.sound.play(Paths.sound('confirmMenu'), volume);
+	}
+
+	public static function playCancelSound(volume:Float = 0.7) {
+		FlxG.sound.play(Paths.sound('cancelMenu'), volume);
+	}
+
+	public static function sortAlphabetically(a:String, b:String):Int {
+		var val1 = a.toUpperCase();
+		var val2 = b.toUpperCase();
+		if (val1 < val2) {
+		  return -1;
+		} else if (val1 > val2) {
+		  return 1;
+		} else {
+		  return 0;
+		}
+	}
+
+	public static function inPlayState(skipPvP:Bool = false) {
+		return PlayState.instance != null || (!skipPvP && pvp.PvPPlayState.instance != null);
+	}
+
+	public static function inPvPState() {
+		return pvp.PvPPlayState.instance != null;
+	}
+
+	public static function getPlayState():Dynamic {
+		return pvp.PvPPlayState.instance != null ? pvp.PvPPlayState.instance : PlayState.instance;
+	}
+
+	public static function alert(message:String, title:String = 'Error!') {
+		#if desktop
+		Application.current.window.alert(message, title);
+		#end
+	}
+
+	public static function getCamFollowCharacter(char:Character):Dynamic {
+		return {
+			x: (char.x * char.scrollFactor.x) + (char.width / 2),
+			y: (char.y * char.scrollFactor.y) + (char.height / 4)
+		};
+	}
+
+	public static function scrollSpeedFromBPM(bpm:Float, denominator:Int = 4, noteSize:Float = 112) {
+		var stepCrochet = (((60 / bpm) * 4000) / denominator) / 4;
+		var noteY = 0.45 * stepCrochet;
+		return FlxMath.roundDecimal(noteSize / noteY, 2);
 	}
 }

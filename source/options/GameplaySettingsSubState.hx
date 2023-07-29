@@ -13,7 +13,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 
 		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Downscroll', //Name
-			'If checked, notes go Down instead of Up, simple enough.', //Description
+			'If checked, notes go down instead of up, simple enough.', //Description
 			'downScroll', //Save data variable name
 			'bool', //Variable type
 			false); //Default value
@@ -26,9 +26,23 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('Opponent Notes',
+			'If unchecked, opponent notes get hidden.',
+			'opponentStrums',
+			'bool',
+			true);
+		addOption(option);
+
 		var option:Option = new Option('Ghost Tapping',
 			"If checked, you won't get misses from pressing keys while there are no notes able to be hit.",
 			'ghostTapping',
+			'bool',
+			true);
+		addOption(option);
+
+		var option:Option = new Option('"Shit" Counts as Miss',
+			'If checked, getting a "Shit" rating will count as a miss.',
+			'shitMisses',
 			'bool',
 			true);
 		addOption(option);
@@ -47,20 +61,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
-		var option:Option = new Option('Instrumental Volume',
-			'Sets the volume for the song instrumentals.',
-			'instVolume',
-			'percent',
-			1);
-		addOption(option);
-
-		var option:Option = new Option('Vocals Volume',
-			'Sets the volume for the song vocals.',
-			'voicesVolume',
-			'percent',
-			1);
-		addOption(option);
-
 		var option:Option = new Option('Hitsound Volume',
 			'A "tick" sound plays when you hit a note.',
 			'hitsoundVolume',
@@ -71,6 +71,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.maxValue = 1;
 		option.changeValue = 0.1;
 		option.decimals = 1;
+		option.onChange = onChangeHitsoundVolume;
 		addOption(option);
 
 		var option:Option = new Option('Rating Offset',
@@ -129,7 +130,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Auto Pause',
-			"If checked, the game will be paused when you switch to another window.",
+			"If checked, the game will be frozen when it loses focus.",
 			'autoPause',
 			'bool',
 			#if html5
@@ -143,6 +144,19 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		}
 		addOption(option);
 
+		var option:Option = new Option('Pause Game When Focus is Lost',
+			"If checked, the pause menu will automatically open when focus is lost while playing a song.",
+			'focusLostPause',
+			'bool',
+			true
+			);
+		addOption(option);
+
 		super();
+	}
+
+	function onChangeHitsoundVolume()
+	{
+		FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
 	}
 }

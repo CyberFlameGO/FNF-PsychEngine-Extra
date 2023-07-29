@@ -10,13 +10,10 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
 
 using StringTools;
 
-class BaseOptionsMenu extends MusicBeatSubstate
+class BaseOptionsMenu extends MusicBeatSubState
 {
 	private var curOption:Option = null;
 	private var curSelected:Int = 0;
@@ -78,7 +75,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		for (i in 0...optionsArray.length)
 		{
-			var optionText:Alphabet = new Alphabet(0, 70 * i, optionsArray[i].name, false, false);
+			var optionText:Alphabet = new Alphabet(0, 70 * i, optionsArray[i].name, optionsArray[i].type == 'button');
 			optionText.isMenuItem = true;
 			optionText.x += 300;
 			optionText.xAdd = 200;
@@ -90,6 +87,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				checkbox.sprTracker = optionText;
 				checkbox.ID = i;
 				checkboxGroup.add(checkbox);
+			} else if (optionsArray[i].type == 'button') {
+				optionText.x -= 80;
+				optionText.xAdd -= 80;
 			} else {
 				optionText.x -= 80;
 				optionText.xAdd -= 80;
@@ -122,18 +122,33 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	var holdValue:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (controls.UI_UP_P || (!FlxG.keys.pressed.SHIFT && FlxG.mouse.wheel > 0))
+		if ((controls.UI_UP_P) || (!FlxG.keys.pressed.SHIFT && FlxG.mouse.wheel > 0))
 		{
 			changeSelection(-1);
+			holdTime = 0;
 		}
-		if (controls.UI_DOWN_P || (!FlxG.keys.pressed.SHIFT && FlxG.mouse.wheel < 0))
+		if ((controls.UI_DOWN_P) || (!FlxG.keys.pressed.SHIFT && FlxG.mouse.wheel < 0))
 		{
 			changeSelection(1);
+			holdTime = 0;
+		}
+		var down = controls.UI_DOWN;
+		var up = controls.UI_UP;
+		if (down || up)
+		{
+			var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
+			holdTime += elapsed;
+			var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+
+			if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
+			{
+				changeSelection((checkNewHold - checkLastHold) * (up ? -1 : 1));
+			}
 		}
 
 		if (controls.BACK) {
 			close();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			CoolUtil.playCancelSound();
 		}
 
 		if (nextAccept <= 0)
@@ -148,12 +163,18 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			{
 				if (controls.ACCEPT || FlxG.mouse.justPressed)
 				{
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+					CoolUtil.playScrollSound();
 					curOption.setValue((curOption.getValue() == true) ? false : true);
 					curOption.change();
 					reloadCheckboxes();
 				}
-			} else {
+			} else if (curOption.type == 'button') {
+				if (controls.ACCEPT || FlxG.mouse.justPressed)
+				{
+					CoolUtil.playScrollSound();
+					curOption.change();
+				}
+			} else if (!down && !up) {
 				if (controls.UI_LEFT || controls.UI_RIGHT || (FlxG.mouse.wheel != 0 && FlxG.keys.pressed.SHIFT)) {
 					var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
 					var useWheel = FlxG.mouse.wheel != 0 && FlxG.keys.pressed.SHIFT;
@@ -164,7 +185,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 								if (useWheel) {
 									add = curOption.changeValue * Std.int(CoolUtil.boundTo(FlxG.mouse.wheel, -1, 1));
 								} else {
-									add = controls.UI_LEFT ? -curOption.changeValue : curOption.changeValue;
+									add = (controls.UI_LEFT) ? -curOption.changeValue : curOption.changeValue;
 								}
 							}
 
@@ -203,9 +224,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 							}
 							updateTextFrom(curOption);
 							curOption.change();
-							FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+							CoolUtil.playScrollSound();
 						} else if (curOption.type != 'string') {
-							holdValue += curOption.scrollSpeed * elapsed * (controls.UI_LEFT ? -1 : 1);
+							holdValue += curOption.scrollSpeed * elapsed * ((controls.UI_LEFT) ? -1 : 1);
 							if (holdValue < curOption.minValue) holdValue = curOption.minValue;
 							else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
 
@@ -235,23 +256,25 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				for (i in 0...optionsArray.length)
 				{
 					var leOption:Option = optionsArray[i];
-					leOption.setValue(leOption.defaultValue);
-					if (leOption.type != 'bool')
-					{
-						if (leOption.type == 'string')
+					if (leOption.type != 'button') {
+						leOption.setValue(leOption.defaultValue);
+						if (leOption.type != 'bool')
 						{
-							leOption.curOption = leOption.options.indexOf(leOption.getValue());
+							if (leOption.type == 'string')
+							{
+								leOption.curOption = leOption.options.indexOf(leOption.getValue());
+							}
+							updateTextFrom(leOption);
 						}
-						updateTextFrom(leOption);
+						leOption.change();
 					}
-					leOption.change();
 				}
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				CoolUtil.playCancelSound();
 				reloadCheckboxes();
 			}
 		}
 
-		if (boyfriend != null && boyfriend.animation.curAnim.finished) {
+		if (boyfriend != null && boyfriend.animation.curAnim != null && boyfriend.animation.curAnim.finished) {
 			boyfriend.dance();
 		}
 
@@ -272,7 +295,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	function clearHold()
 	{
 		if (holdTime > 0.5) {
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+			CoolUtil.playScrollSound();
 		}
 		holdTime = 0;
 	}
@@ -316,7 +339,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			boyfriend.visible = optionsArray[curSelected].showBoyfriend;
 		}
 		curOption = optionsArray[curSelected]; //shorter lol
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		CoolUtil.playScrollSound();
 	}
 
 	public function reloadBoyfriend()

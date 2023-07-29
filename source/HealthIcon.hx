@@ -1,17 +1,26 @@
 package;
 
-import flixel.FlxG;
+import haxe.Json;
 import flixel.FlxSprite;
 
 using StringTools;
 
+typedef IconFile = {
+	var ?noAntialiasing:Bool;
+	var ?fps:Int; //Will only affect icons from Sparrow Atlas
+	var ?hasWinIcon:Bool; //Will only affect icons from an icon grid, Sparrow Atlas icons have this automatically detected
+}
+
 class HealthIcon extends FlxSprite
 {
 	public var sprTracker:FlxSprite;
+	public var xAdd:Float = 0;
+	public var yAdd:Float = 0;
 	private var isOldIcon:Bool = false;
-	private var isPlayer:Bool = false;
-	private var char:String = '';
+	public var isPlayer:Bool = false;
+	public var char(default, null):String = '';
 	var originalChar:String = 'bf-old';
+	public var iconJson:IconFile;
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
@@ -27,7 +36,7 @@ class HealthIcon extends FlxSprite
 		super.update(elapsed);
 
 		if (sprTracker != null)
-			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+			setPosition(sprTracker.x + sprTracker.width + 10 + xAdd, sprTracker.y - 30 + yAdd);
 	}
 
 	public function swapOldIcon() {
@@ -35,34 +44,48 @@ class HealthIcon extends FlxSprite
 		else changeIcon(originalChar);
 	}
 
-	private var iconOffsets:Array<Float> = [0, 0];
+	public var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
 		if (this.char != char) {
+			if (char.length < 1)
+				char = 'face';
+			iconJson = getFile(char);
 			var name:String = 'icons/$char';
-			if (!Paths.fileExists('images/$name.png', IMAGE)) {
+			if (!Paths.existsPath('images/$name.png', IMAGE)) {
 				name = 'icons/icon-$char'; //Older versions of psych engine's support
 			}
-			if (!Paths.fileExists('images/$name.png', IMAGE)) {
-				name = 'icons/icon-face'; //Prevents crash from missing icon
-				FlxG.log.warn('Couldn\'t find icon file for $char!');
+			if (!Paths.existsPath('images/$name.png', IMAGE)) {
+				name = 'icons/face'; //Prevents crash from missing icon
 			}
-			var file = Paths.image(name);
+			if (Paths.existsPath('images/$name.xml', TEXT)) {
+				frames = Paths.getSparrowAtlas(name);
+				animation.addByPrefix('normal', 'normal', iconJson.fps, iconJson.fps > 0, isPlayer);
+				animation.addByPrefix('losing', 'losing', iconJson.fps, iconJson.fps > 0, isPlayer);
+				animation.addByPrefix('winning', 'winning', iconJson.fps, iconJson.fps > 0, isPlayer);
+				if (!animation.exists('winning')) //No winning icon
+					animation.addByPrefix('winning', 'normal', iconJson.fps, iconJson.fps > 0, isPlayer);
+				playAnim('normal');
+			} else {
+				var file = Paths.image(name);
+				if (file != null) {
+					loadGraphic(file); //Load stupidly first for getting the file size
+					loadGraphic(file, true, Math.floor(width / (iconJson.hasWinIcon ? 3 : 2)), Math.floor(height)); //Then load it fr
 
-			loadGraphic(file); //Load stupidly first for getting the file size
-			loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr
+					animation.add('normal', [0], 0, false, isPlayer);
+					animation.add('losing', [1], 0, false, isPlayer);
+					animation.add('winning', [iconJson.hasWinIcon ? 2 : 0], 0, false, isPlayer);
+					playAnim('normal');
+				} else {
+					visible = false;
+				}
+			}
 			iconOffsets[0] = (width - 150) / 2;
-			iconOffsets[1] = (width - 150) / 2;
+			iconOffsets[1] = (height - 150) / 2;
 			updateHitbox();
-
-			animation.add(char, [0, 1], 0, false, isPlayer);
-			animation.play(char);
 			this.char = char;
 			if (char != 'bf-old') originalChar = char;
 
-			antialiasing = ClientPrefs.globalAntialiasing;
-			if (char.endsWith('-pixel')) {
-				antialiasing = false;
-			}
+			antialiasing = ClientPrefs.globalAntialiasing && !iconJson.noAntialiasing;
 
 			isOldIcon = (char == 'bf-old');
 		}
@@ -75,7 +98,37 @@ class HealthIcon extends FlxSprite
 		offset.y = iconOffsets[1];
 	}
 
-	public function getCharacter():String {
-		return char;
+	public static function getFile(name:String):IconFile {
+		var characterPath:String = 'images/icons/$name.json';
+		var path:String = Paths.getPath(characterPath);
+		if (!Paths.exists(path, TEXT))
+		{
+			path = Paths.getPreloadPath('images/icons/bf.json'); //If a character couldn't be found, change them to BF just to prevent a crash
+		}
+
+		var rawJson = Paths.getContent(path);
+		if (rawJson == null) {
+			return null;
+		}
+
+		var json:IconFile = cast Json.parse(rawJson);
+		if (json.noAntialiasing == null) json.noAntialiasing = false;
+		if (json.fps == null) json.fps = 24;
+		if (json.hasWinIcon == null) json.hasWinIcon = false;
+		return json;
+	}
+
+	public function playAnim(anim:String) {
+		if (animation.exists(anim))
+			animation.play(anim);
+	}
+
+	override public function destroy() {
+		sprTracker = null;
+		char = null;
+		originalChar = null;
+		iconJson = null;
+		iconOffsets = null;
+		super.destroy();
 	}
 }
